@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eqmetad"
+version = "0.1.0"
+description = "Adiabatic metadynamics in the instantaneous-equilibrium limit"
+dependencies = [
+    "numpy",
+    "scipy",
+    "numba"
+]
+
+[project.scripts]
+metad_gentraj = "metad.gentraj:main"
+metad_readhills = "metad.readhills:main"
+metad_target_distr = "metad.analyze_target_distribution:main"
+metad_config = "metad.config_manager:create_default_config"
+
