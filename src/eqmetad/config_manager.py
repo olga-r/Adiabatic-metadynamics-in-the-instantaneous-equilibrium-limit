@@ -40,7 +40,7 @@ def create_default_config():
     with open(custom_potential_file, "w") as f:
         f.write("import numpy as np\n")
         f.write("def custom(x, left, right):\n")
-        f.write("    pass\n")
+        f.write("    return np.zeros_like(x)\n")
 
 def load_config() -> SimpleNamespace:
     with open(config_file, "r", encoding="utf-8") as f:
