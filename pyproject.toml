@@ -13,8 +13,8 @@ dependencies = [
 ]
 
 [project.scripts]
-metad_gentraj = "metad.gentraj:main"
-metad_readhills = "metad.readhills:main"
-metad_target_distr = "metad.analyze_target_distribution:main"
-metad_config = "metad.config_manager:create_default_config"
+metad_gentraj = "eqmetad.gentraj:main"
+metad_readhills = "eqmetad.readhills:main"
+metad_target_distr = "eqmetad.analyze_target_distribution:main"
+metad_config = "eqmetad.config_manager:create_default_config"
 
