@@ -40,6 +40,9 @@ def create_default_config():
     with open(custom_potential_file, "w") as f:
         f.write("import numpy as np\n")
         f.write("def custom(x, left, right):\n")
+        f.write("    """left and right correspond to the min and max parameters.\n")
+        f.write("       x is defined on the interval [out_min, out_max]\n")  
+        f.write("       min, max, out_min,and  out_max parameters should be set up in the job_config.json"""\n")           
         f.write("    return np.zeros_like(x)\n")
 
 def load_config() -> SimpleNamespace:
