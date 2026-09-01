@@ -7,9 +7,10 @@ name = "eqmetad"
 version = "0.1.0"
 description = "Adiabatic metadynamics in the instantaneous-equilibrium limit"
 dependencies = [
-    "numpy",
-    "scipy",
-    "numba"
+    "numpy>=1.26.0,<2.0.0",
+    "scipy>=1.11.0",
+    "numba>=0.59.0",
+    "h5py>=3.10.0"
 ]
 
 [project.scripts]
