@@ -12,6 +12,7 @@ pip install .
 - numpy
 - scipy
 - numba
+- h5py
 
 # Usage
 1) Change to your working directory and type "metad_config" in the console. Two files will be created: custom_potential.py and job_config.json.
