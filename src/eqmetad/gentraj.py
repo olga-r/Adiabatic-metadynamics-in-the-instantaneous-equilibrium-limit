@@ -254,7 +254,7 @@ def main() -> None:
     cfg = load_config()
     beta = 1.0 / cfg.kBT
     r_delta_T = beta / (cfg.bias_factor - 1.0)
-    alpha = cfg.bias_factor / (cfg.bias_factor - 1.0) if cfg.metad_mode == "wt" else 1.0
+    alpha = beta + r_delta_T if cfg.metad_mode == "wt" else beta
 
     k_mode = kernel_modes[cfg.kernel_mode]
     if k_mode == 1:
