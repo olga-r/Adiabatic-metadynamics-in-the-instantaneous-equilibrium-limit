@@ -90,11 +90,11 @@ def read_chunk(
         if F is not None:
             if method == 2:
                 cell_mass_from_bias_interval(
-                    bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx
+                    bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
                 )
             else:
                 cell_mass_from_bias(
-                    bias_centered, F, log_rho, rho, cell_mass, beta, dx
+                    bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
                 )
 
         center = centers[current_step-1]
