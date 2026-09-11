@@ -165,7 +165,7 @@ def grid_mean_on_interval(values, x, dx, left, right):
     return total * dx / (right - left)
 
 @njit
-def cell_mass_from_bias(V, F, log_rho, rho, cell_mass, beta, dx, alpha=1.0):
+def cell_mass_from_bias(V, F, log_rho, rho, cell_mass, beta, dx, alpha):
     n = len(V)
 
     max_log_rho = -alpha * V[0] - beta * F[0]
@@ -192,7 +192,7 @@ def cell_mass_from_bias(V, F, log_rho, rho, cell_mass, beta, dx, alpha=1.0):
 
 
 @njit
-def cell_mass_from_bias_interval(V, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha=1.0):
+def cell_mass_from_bias_interval(V, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha):
     n = len(s_clamped)
     left = x[0]
 
