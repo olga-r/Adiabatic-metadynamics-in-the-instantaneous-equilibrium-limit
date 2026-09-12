@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 from typing import Any, Dict
 from types import SimpleNamespace
+import textwrap
 
 current_dir = Path(os.getcwd())
 config_file = (current_dir / "job_config.json").resolve()
@@ -34,16 +35,22 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "seed": 8456835
 }
 
-def create_default_config():
+def create_potential_file(custom_potential_file):
+    template = textwrap.dedent('''\
+        import numpy as np
+        
+        def custom(x, left, right):
+            """left and right correspond to the min and max parameters.
+               x is defined on the interval [out_min, out_max]
+               min, max, out_min,and  out_max parameters should be set up in the job_config.json"""
+            return np.zeros_like(x)
+    ''')
+
+def create_default_settings():
     with open(config_file, "w", encoding="utf-8") as f:
         json.dump(DEFAULT_CONFIG, f, indent=4)
     with open(custom_potential_file, "w") as f:
-        f.write("import numpy as np\n")
-        f.write("def custom(x, left, right):\n")
-        f.write("    """left and right correspond to the min and max parameters.\n")
-        f.write("       x is defined on the interval [out_min, out_max]\n")  
-        f.write("       min, max, out_min,and  out_max parameters should be set up in the job_config.json"""\n")           
-        f.write("    return np.zeros_like(x)\n")
+        f.write(template)
 
 def load_config() -> SimpleNamespace:
     with open(config_file, "r", encoding="utf-8") as f:
