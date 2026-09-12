@@ -47,7 +47,7 @@ def plot_kl_distance(distance, time):
 
 def main() -> None:
     cfg = load_config()
-    plt_stride = int(cfg.p_plot_stride/cfg.stride)
+    plt_stride = int(cfg.plot_stride/cfg.stride)
     current_dir = Path(os.getcwd())
     full_path = (current_dir / cfg.base_dir / cfg.filename).resolve()
     if cfg.potential != "none":
