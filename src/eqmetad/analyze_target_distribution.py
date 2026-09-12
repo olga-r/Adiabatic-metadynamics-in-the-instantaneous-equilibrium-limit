@@ -8,7 +8,7 @@ from pathlib import Path
 from scipy.stats import entropy
 from eqmetad.peaks import detect_peaks, analyze_peaks
 from eqmetad.config_manager import load_config
-from eqmetad.potentials import constant,  corrected_cos3d_potential
+from eqmetad.potentials import constant
 from eqmetad.utils import make_nested_grid, make_grid, natural_sort,import_custom_potential
 from matplotlib import pyplot as plt
 from copy import deepcopy
