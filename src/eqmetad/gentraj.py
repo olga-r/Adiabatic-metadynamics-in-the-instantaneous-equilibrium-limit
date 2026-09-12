@@ -72,7 +72,8 @@ def run_chunk(
 
     save_idx = 0
     r_length = 1.0 / (right - left)
-
+    ab = alpha/beta
+    
     hill_mean = 0.0
     s_clamped = x
     mcg_inv_mean = np.empty_like(x)
@@ -107,9 +108,9 @@ def run_chunk(
             if method == 2 or method == 3:
                 for i in range(len(s_clamped)):
                     bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
-                    history_bias[save_idx] = bias_interval
+                    history_bias[save_idx] = ab*bias_interval
             else:
-                history_bias[save_idx] = bias_centered
+                history_bias[save_idx] = ab*bias_centered
             history_mass[save_idx] = cell_mass
             history_center[save_idx] = center
             history_height[save_idx] = height_step
