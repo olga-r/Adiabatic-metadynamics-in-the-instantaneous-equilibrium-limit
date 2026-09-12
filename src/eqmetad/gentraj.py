@@ -258,7 +258,7 @@ def run_simulation_to_disk(
 def main() -> None:
     cfg = load_config()
     beta = 1.0 / cfg.kBT
-    r_delta_T = beta / (cfg.bias_factor - 1.0)
+    r_delta_T = beta / (cfg.bias_factor - 1.0) if cfg.metad_mode == "wt" else -1
     alpha = beta + r_delta_T if cfg.metad_mode == "wt" else beta
 
     k_mode = kernel_modes[cfg.kernel_mode]
