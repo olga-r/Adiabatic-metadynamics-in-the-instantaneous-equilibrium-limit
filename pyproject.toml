@@ -10,12 +10,13 @@ dependencies = [
     "numpy>=1.26.0,<2.0.0",
     "scipy>=1.11.0",
     "numba>=0.59.0",
-    "h5py>=3.10.0"
+    "h5py>=3.10.0",
+    "matplotlib>=3.8.0"
 ]
 
 [project.scripts]
 metad_gentraj = "eqmetad.gentraj:main"
 metad_readhills = "eqmetad.readhills:main"
 metad_target_distr = "eqmetad.analyze_target_distribution:main"
-metad_config = "eqmetad.config_manager:create_default_config"
+metad_config = "eqmetad.config_manager:create_default_settings"
 
