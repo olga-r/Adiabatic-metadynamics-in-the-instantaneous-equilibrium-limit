@@ -22,10 +22,11 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "max": 1,
     "out_min": 0,
     "out_max": 1,
-    "kernel_mode": "unit_integral",
+    "kernel_mode": "unit_integral", #"unit_peak"
     "total_steps": 1_000_000_000,
     "chunk_size":  1_000_000,
     "stride":  10_000,
+    "plot_stride": 100_000_000,
     "deposition_pace": 500*0.001,
     "base_dir":  "./",
     "filename": "simulation_results.h5",
