@@ -89,18 +89,46 @@ def run_chunk(
     #####################
     # Main loop
     #####################
-    for i in range(1, chunk_size + 1):
+    for i in range(0, chunk_size ):
+        removed_mean = 0.0
         current_step = start_step + i
+        
+        # 1. save to disk
+        if current_step % stride == 0:
+            if m_mode == 1:
+                if method == 2 or method==3:
+                    cell_mass_from_bias_interval(
+                             bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
+                    )
+                else:
+                    cell_mass_from_bias(
+                            bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
+                    )
+            if method == 2 or method == 3:
+                for i in range(len(s_clamped)):
+                    bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
+                    history_bias[save_idx] = bias_interval
+            else:
+                history_bias[save_idx] = bias_centered
+            history_mass[save_idx] = cell_mass
+            history_center[save_idx] = center
+            history_height[save_idx] = height_step
+            history_steps[save_idx] = current_step
+            history_time[save_idx] = time
+            save_idx += 1
+
+        #2. Sample distribution
         if method == 2 or method == 3:
             cell_mass_from_bias_interval(
-                bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
+                bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx
             )
         else:
             cell_mass_from_bias(
-                bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
+                bias_centered, F, log_rho, rho, cell_mass, beta, dx
             )
         center = sample_density(cell_mass, edges)
 
+        #3. Compute hill and its mean
         if method == 0:
             hill = gaussian_periodic(x, center, gauss_val, sigma, k_mode, left, right)
         elif method == 3:
@@ -112,6 +140,7 @@ def run_chunk(
             hill = gaussian(x, center, gauss_val, sigma, k_mode)
             hill_mean = r_length * gaussian_integral_on_interval(center, sigma, k_mode, left, right)
 
+        #4. Deposit hill and update V
         if method != 3 or deposit:
             if m_mode == 1:
                 center_clipped = max(left, min(center, right))
@@ -123,16 +152,6 @@ def run_chunk(
                 height_step = hill_height(height, r_delta_T, bias_at_center)
                 time_factor = np.exp(-r_delta_T * bias_level)
                 time += height * time_factor
-
-                if current_step % stride == 0:
-                    if method == 2 or method==3:
-                        cell_mass_from_bias_interval(
-                             bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
-                        )
-                    else:
-                        cell_mass_from_bias(
-                            bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
-                        )
                 bias_level += height_step * hill_mean
 
             elif m_mode == 0:
@@ -148,23 +167,9 @@ def run_chunk(
         else:
             height_step = 0.0
 
-
         if m_mode == 1:
             bias_level += removed_mean
 
-        if current_step % stride == 0:
-            if method == 2 or method == 3:
-                for i in range(len(s_clamped)):
-                    bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
-                    history_bias[save_idx] = bias_interval
-            else:
-                history_bias[save_idx] = bias_centered
-            history_mass[save_idx] = cell_mass
-            history_center[save_idx] = center
-            history_height[save_idx] = height_step
-            history_steps[save_idx] = current_step
-            history_time[save_idx] = time
-            save_idx += 1
 
     return (
         bias_centered,
@@ -177,7 +182,6 @@ def run_chunk(
         history_mass[:save_idx],
         history_time[:save_idx],
     )
-
 
 def run_simulation_to_disk(
     method, total_steps, chunk_size, stride, seed, n_grid,
@@ -218,6 +222,7 @@ def run_simulation_to_disk(
 
         write_idx = 0
         for start_step in range(0, total_steps, chunk_size):
+            chunk_size_valid = min(chunk_size, total_steps-start_step)
             (
                 bias_centered,
                 bias_level,
@@ -231,7 +236,7 @@ def run_simulation_to_disk(
             ) = run_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, start_step, chunk_size, stride, left, right
+                height, start_step, chunk_size_valid, stride, left, right
             )
 
             n_new_records = len(h_steps)
