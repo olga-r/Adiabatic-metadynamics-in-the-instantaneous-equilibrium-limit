@@ -42,11 +42,11 @@ def analyze_peaks(peaks_indices, p, grid_centers, masses, left, right):
             peaks_mass += m
         if std < max_peak_std:
             if a == 0:
-                boundary_second_moment = float(np.dot(local_x ** 2, local_mass) / m)
+                boundary_second_moment = float(np.dot((local_x-left) ** 2, local_mass) / m)
                 boundary_rms = np.sqrt(boundary_second_moment)
             elif b == len(p):
                 boundary_second_moment = float(
-                    np.dot((1.0 - local_x) ** 2, local_mass) / m
+                    np.dot((right - local_x) ** 2, local_mass) / m
                 )
                 boundary_rms = np.sqrt(boundary_second_moment)
             else:
