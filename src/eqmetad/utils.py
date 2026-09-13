@@ -9,13 +9,13 @@ def natural_sort(l):
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
     return sorted(l, key=alphanum_key)
 
-def smoothen_log_density(p, filter_width):
+def smoothen_log_density(p, filter_width, mode):
     minimum_level = max(np.max(p) * 1.0e-300, np.finfo(float).tiny)
     logp = np.log(np.maximum(p, minimum_level))
     smooth_logp = gaussian_filter1d(
         logp,
         sigma=filter_width,
-        mode="nearest",
+        mode=mode,
     )
     return smooth_logp
 
