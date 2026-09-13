@@ -14,7 +14,7 @@ def detect_peaks(dx, sigma, peak_threshold, filter_width, p, periodic=False):
             smooth_logp[:boundary_window]
         ])
 
-        peak_indices, _ = find_peaks(padded_logp, prominence=peak_threshold, distance=3, mode="wrap")
+        peak_indices, _ = find_peaks(padded_logp, prominence=peak_threshold, distance=3)
 
         actual_peaks = set()
         for idx in peak_indices:
