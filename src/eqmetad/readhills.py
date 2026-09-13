@@ -69,7 +69,8 @@ def read_chunk(
 
     save_idx = 0
     r_length = 1.0 / (right - left)
-
+    ab = alpha/beta
+    
     hill_mean = 0.0
     s_clamped = x
 
