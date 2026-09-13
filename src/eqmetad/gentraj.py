@@ -223,8 +223,6 @@ def run_chunk(
         bias_centered,
         bias_level,
         time,
-        center,
-        height_step,
         history_steps[:save_idx],
         history_center[:save_idx],
         history_height[:save_idx],
