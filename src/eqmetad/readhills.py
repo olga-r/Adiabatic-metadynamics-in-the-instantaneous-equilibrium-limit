@@ -202,6 +202,7 @@ def save_data_to_disk(
 
         write_idx = 0
         for start_step in range(0, total_steps, chunk_size):
+            chunk_size_valid = min(chunk_size, total_steps-start_step)
             (
                 bias_centered,
                 bias_level,
@@ -215,7 +216,7 @@ def save_data_to_disk(
             ) = read_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, start_step, chunk_size, total_steps, stride, centers, pace,  left, right
+                height, start_step, chunk_size_valid, total_steps, stride, centers, pace,  left, right
             )
 
             n_new_records = len(h_steps)
