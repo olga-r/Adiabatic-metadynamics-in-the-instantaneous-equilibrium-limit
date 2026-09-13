@@ -27,7 +27,6 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "chunk_size":  1_000_000,
     "stride":  10_000,
     "plot_stride": 100_000_000,
-    "deposition_pace": 500*0.001,
     "base_dir":  "./",
     "filename": "simulation_results.h5",
     "hill_file": "./HILLS",
