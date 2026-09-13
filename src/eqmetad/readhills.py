@@ -85,7 +85,33 @@ def read_chunk(
     #####################
     for i in range(0, chunk_size):
         current_step = start_step + i
+        center = centers[current_step]
+        
+        # 1. save to disk
+        if current_step % stride == 0:
+            if F is not None:
+                if method == 2:
+                    cell_mass_from_bias_interval(
+                             bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
+                    )
+                else:
+                    cell_mass_from_bias(
+                            bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
+                    )
+                history_mass[save_idx] = cell_mass
+            if method == 2:
+                for i in range(len(s_clamped)):
+                    bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
+                    history_bias[save_idx] = ab*bias_interval
+            else:
+                history_bias[save_idx] = ab*bias_centered
 
+            history_center[save_idx] = center
+            history_height[save_idx] = height_step
+            history_steps[save_idx] = current_step
+            history_time[save_idx] = time
+            save_idx += 1
+            
         if F is not None:
             if method == 2:
                 cell_mass_from_bias_interval(
@@ -96,7 +122,7 @@ def read_chunk(
                     bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
                 )
 
-        center = centers[current_step-1]
+        
 
         if method != 0:
             hill = gaussian(x, center, gauss_val, sigma, k_mode)
