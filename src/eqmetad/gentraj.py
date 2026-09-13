@@ -45,8 +45,7 @@ def run_chunk(
     bias_factor,
     r_delta_T,
     height,
-    center,
-    height_step,
+    total_steps,
     start_step,
     chunk_size,
     stride,
@@ -58,9 +57,11 @@ def run_chunk(
     time = time_init
 
 
-    max_saves = chunk_size // stride + 1
-    history_bias = np.empty((max_saves, len(x)), dtype=np.float64)
-    history_mass = np.empty((max_saves, len(x)), dtype=np.float64)
+    max_saves = chunk_size // stride + 2
+    history_bias_pb = np.empty((max_saves, len(x)), dtype=np.float64)
+    history_bias_pw = np.empty((max_saves, len(x)), dtype=np.float64)
+    history_mass_pb = np.empty((max_saves, len(x)), dtype=np.float64)
+    history_mass_pw = np.empty((max_saves, len(x)), dtype=np.float64)
     history_center = np.empty(max_saves, dtype=np.float64)
     history_height = np.empty(max_saves, dtype=np.float64)
     history_steps = np.empty(max_saves, dtype=np.int64)
@@ -89,37 +90,51 @@ def run_chunk(
         if method == 3:
             mcgovern_inverse_mean(x, mcg_inv_mean, sigma, k_mode, left, right)
 
+    # save zero step to disk
+    if start_step == 0:
+        if method == 2 or method==3:
+            cell_mass_from_bias_interval(
+                 bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
+            )
+            history_mass_pw[save_idx] = cell_mass
+            cell_mass_from_bias_interval(
+                 bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
+            )
+            history_mass_pb[save_idx] = cell_mass 
+            for i in range(len(s_clamped)):
+                bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
+            history_bias_pw[save_idx] = ab*bias_interval
+            history_bias_pb[save_idx] = bias_interval
+        else:
+            cell_mass_from_bias(
+                bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
+            )
+            history_mass_pw[save_idx] = cell_mass
+            cell_mass_from_bias(
+                bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
+            )
+            history_mass_pb[save_idx] = cell_mass
+            history_bias_pw[save_idx] = ab*bias_centered
+            history_bias_pb[save_idx] = bias_centered
+            
+        history_center[save_idx] = np.nan
+        history_height[save_idx] = np.nan
+        history_steps[save_idx] = 0
+        history_time[save_idx] = time
+        save_idx += 1        
+        
+
     #####################
     # Main loop
     #####################
-    for i in range(0, chunk_size ):
+    for i in range(1, chunk_size+1 ):
         removed_mean = 0.0
-        current_step = start_step + i
+        current_step = start_step + i     
+        should_save = ( current_step % stride == 0
+                        or current_step == total_steps
+                      )
         
-        # 1. save to disk
-        if current_step % stride == 0:
-            if method == 2 or method==3:
-                cell_mass_from_bias_interval(
-                             bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
-                )
-            else:
-                cell_mass_from_bias(
-                        bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
-                )
-            if method == 2 or method == 3:
-                for i in range(len(s_clamped)):
-                    bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
-                    history_bias[save_idx] = ab*bias_interval
-            else:
-                history_bias[save_idx] = ab*bias_centered
-            history_mass[save_idx] = cell_mass
-            history_center[save_idx] = center
-            history_height[save_idx] = height_step
-            history_steps[save_idx] = current_step
-            history_time[save_idx] = time
-            save_idx += 1
-
-        #2. Sample distribution
+        #1. Sample distribution
         if method == 2 or method == 3:
             cell_mass_from_bias_interval(
                 bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
@@ -130,7 +145,7 @@ def run_chunk(
             )
         center = sample_density(cell_mass, edges)
 
-        #3. Compute hill and its mean
+        #2. Compute hill and its mean
         if method == 0:
             hill = gaussian_periodic(x, center, gauss_val, sigma, k_mode, left, right)
         elif method == 3:
@@ -142,7 +157,7 @@ def run_chunk(
             hill = gaussian(x, center, gauss_val, sigma, k_mode)
             hill_mean = r_length * gaussian_integral_on_interval(center, sigma, k_mode, left, right)
 
-        #4. Deposit hill and update V
+        #3. Deposit hill and update V
         if method != 3 or deposit:
             if m_mode == 1:
                 center_clipped = max(left, min(center, right))
@@ -161,7 +176,6 @@ def run_chunk(
                 time_factor = current_step
                 time = height * time_factor
 
-
             bias_centered += height_step * (hill - hill_mean)
             bias_centered_interval = bias_centered[(x > left) & (x < right)]
             removed_mean = r_length * dx * np.sum(bias_centered_interval)
@@ -172,6 +186,38 @@ def run_chunk(
         if m_mode == 1:
             bias_level += removed_mean
 
+        # 4. save to disk
+        if should_save:
+            if method == 2 or method==3:
+                cell_mass_from_bias_interval(
+                     bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
+                )
+                history_mass_pw[save_idx] = cell_mass
+                cell_mass_from_bias_interval(
+                     bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
+                )
+                history_mass_pb[save_idx] = cell_mass 
+                for i in range(len(s_clamped)):
+                    bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
+                history_bias_pw[save_idx] = ab*bias_interval
+                history_bias_pb[save_idx] = bias_interval
+            else:
+                cell_mass_from_bias(
+                    bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
+                )
+                history_mass_pw[save_idx] = cell_mass
+                cell_mass_from_bias(
+                    bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
+                )
+                history_mass_pb[save_idx] = cell_mass
+                history_bias_pw[save_idx] = ab*bias_centered
+                history_bias_pb[save_idx] = bias_centered
+            
+            history_center[save_idx] = center
+            history_height[save_idx] = height_step
+            history_steps[save_idx] = current_step
+            history_time[save_idx] = time
+            save_idx += 1 
 
     return (
         bias_centered,
@@ -182,9 +228,11 @@ def run_chunk(
         history_steps[:save_idx],
         history_center[:save_idx],
         history_height[:save_idx],
-        history_bias[:save_idx],
-        history_mass[:save_idx],
-        history_time[:save_idx],
+        history_bias_pb[:save_idx],
+        history_bias_pw[:save_idx],
+        history_mass_pb[:save_idx],
+        history_mass_pw[:save_idx],
+        history_time[:save_idx]
     )
 
 def run_simulation_to_disk(
@@ -201,9 +249,8 @@ def run_simulation_to_disk(
     bias_centered = np.zeros_like(x)
     bias_level = 0.0
     time = 0.0
-    height_step = 0.0
-    center = 0.5*(left+right)
-    total_saves = total_steps // stride +1
+    total_saves = ( 1 + total_steps // stride
+    + (1 if total_steps % stride != 0 else 0))
 
     with h5py.File(filename, "w") as f:
         d_steps = f.create_dataset("steps", (total_saves,), dtype="i8")
@@ -211,15 +258,23 @@ def run_simulation_to_disk(
         d_heights = f.create_dataset("heights", (total_saves,), dtype="f8")
         d_time = f.create_dataset("time", (total_saves,), dtype="f8")
 
-        d_bias = f.create_dataset(
-            "bias", (total_saves, n_grid), dtype="f8",
+        d_bias_pb = f.create_dataset(
+            "bias_pb", (total_saves, n_grid), dtype="f8",
             compression="gzip", chunks=(min(100, total_saves), n_grid)
         )
-        d_mass = f.create_dataset(
-            "cell_mass", (total_saves, n_grid), dtype="f8",
+        d_bias_pw = f.create_dataset(
+            "bias_pw", (total_saves, n_grid), dtype="f8",
             compression="gzip", chunks=(min(100, total_saves), n_grid)
         )
-
+        
+        d_mass_pb = f.create_dataset(
+            "cell_mass_pb", (total_saves, n_grid), dtype="f8",
+            compression="gzip", chunks=(min(100, total_saves), n_grid)
+        )
+        d_mass_pw = f.create_dataset(
+            "cell_mass_pw", (total_saves, n_grid), dtype="f8",
+            compression="gzip", chunks=(min(100, total_saves), n_grid)
+        )
         f.create_dataset("grid_x", data=x)
         f.create_dataset("grid_edges", data=edges)
 
@@ -232,18 +287,18 @@ def run_simulation_to_disk(
                 bias_centered,
                 bias_level,
                 time,
-                center,
-                height_step,
                 h_steps,
                 h_centers,
                 h_heights,
-                h_bias,
-                h_mass,
+                h_bias_pb,
+                h_bias_pw,
+                h_mass_pb,
+                h_mass_pw,
                 h_time
             ) = run_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, center, height_step, start_step, chunk_size_valid, stride, left, right
+                height, total_steps, start_step, chunk_size_valid, stride, left, right
             )
 
             n_new_records = len(h_steps)
@@ -254,9 +309,11 @@ def run_simulation_to_disk(
                 d_time[write_idx:next_idx] = h_time
                 d_centers[write_idx:next_idx] = h_centers
                 d_heights[write_idx:next_idx] = h_heights
-                d_bias[write_idx:next_idx, :] = h_bias
-                d_mass[write_idx:next_idx, :] = h_mass
-
+                d_bias_pb[write_idx:next_idx, :] = h_bias_pb
+                d_bias_pw[write_idx:next_idx, :] = h_bias_pw                
+                d_mass_pb[write_idx:next_idx, :] = h_mass_pb
+                d_mass_pw[write_idx:next_idx, :] = h_mass_pw
+                
                 write_idx = next_idx
 
             print(f"Progress: {start_step + chunk_size} / {total_steps} steps executed.")
