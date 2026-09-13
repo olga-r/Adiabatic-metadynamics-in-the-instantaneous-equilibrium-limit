@@ -140,7 +140,7 @@ def read_chunk(
         elif m_mode == 0:
             height_step = height
             time_factor = current_step
-            time = height * time_factor
+            time = height * time_factor * pace
 
         bias_centered += height_step * (hill - hill_mean)
         removed_mean = r_length * dx * np.sum(bias_centered)
