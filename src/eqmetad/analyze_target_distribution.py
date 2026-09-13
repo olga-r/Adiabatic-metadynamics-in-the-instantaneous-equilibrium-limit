@@ -55,7 +55,7 @@ def main() -> None:
         f = h5py.File(full_path, 'r')
         ( bias_pb, bias_pw, hills_centers, time,
         heights, steps, grid_edges, grid_centers
-        )  = (  f['bias'][:],  f['centers'][:],
+        )  = (  f['bias_pb'][:],  f['bias_pw'][:],  f['centers'][:],
            f['time'][:], f['heights'][:], f['steps'][:],
            f['grid_edges'][:], f['grid_x'][:])
         dx = grid_edges[1]-grid_edges[0]
