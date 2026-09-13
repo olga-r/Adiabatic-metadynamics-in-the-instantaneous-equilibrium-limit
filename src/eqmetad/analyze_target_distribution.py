@@ -62,6 +62,9 @@ def main() -> None:
         kl_distance = np.zeros_like(steps, dtype=float)
         mass_in_peaks = np.zeros_like(steps, dtype=float)
         all_data = {}
+        periodic = False
+        if cfg.method == "periodic":
+            periodic=True
         for step_idx, step in enumerate(steps):
             masses = np.squeeze(cell_mass[step_idx])
             p = masses / dx
@@ -80,10 +83,10 @@ def main() -> None:
             peak_indices = detect_peaks(
                 dx=dx, sigma=cfg.sigma,
                 peak_threshold=cfg.peak_threshold,
-                filter_width=cfg.filter_width, p = p
+                filter_width=cfg.filter_width, p = p, periodic=periodic
             )
 
-            step_mass, step_data = analyze_peaks(peaks_indices=peak_indices, p=p, grid_centers=grid_centers_interval, masses=masses, left = cfg.min, right = cfg.max)
+            step_mass, step_data = analyze_peaks(peaks_indices=peak_indices, p=p, grid_centers=grid_centers_interval, masses=masses, left = cfg.min, right = cfg.max, periodic=periodic)
             mass_in_peaks[step_idx] = step_mass
             all_data[int(step)] = step_data
 
