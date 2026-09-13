@@ -43,7 +43,6 @@ def read_chunk(
     height,
     start_step,
     chunk_size,
-    total_steps,
     stride,
     centers,
     pace,
@@ -83,8 +82,7 @@ def read_chunk(
     #####################
     # Main loop
     #####################
-    chnk = chunk_size if total_steps-start_step >= chunk_size else total_steps-start_step
-    for i in range(1, chnk + 1):
+    for i in range(0, chunk_size):
         current_step = start_step + i
 
         if F is not None:
@@ -232,8 +230,8 @@ def save_data_to_disk(
                     d_mass[write_idx:next_idx, :] = h_mass
 
                 write_idx = next_idx
-            chnk = chunk_size if total_steps-start_step >= chunk_size else total_steps-start_step
-            print(f"Progress: {start_step + chnk} / {total_steps} steps are saved.")
+
+            print(f"Progress: {start_step + chunk_size_valid} / {total_steps} steps are saved.")
 
 
 def main() -> None:
