@@ -96,15 +96,14 @@ def run_chunk(
         
         # 1. save to disk
         if current_step % stride == 0:
-            if m_mode == 1:
-                if method == 2 or method==3:
-                    cell_mass_from_bias_interval(
+            if method == 2 or method==3:
+                cell_mass_from_bias_interval(
                              bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
-                    )
-                else:
-                    cell_mass_from_bias(
-                            bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
-                    )
+                )
+            else:
+                cell_mass_from_bias(
+                        bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
+                )
             if method == 2 or method == 3:
                 for i in range(len(s_clamped)):
                     bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
@@ -121,11 +120,11 @@ def run_chunk(
         #2. Sample distribution
         if method == 2 or method == 3:
             cell_mass_from_bias_interval(
-                bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx
+                bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
             )
         else:
             cell_mass_from_bias(
-                bias_centered, F, log_rho, rho, cell_mass, beta, dx
+                bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
             )
         center = sample_density(cell_mass, edges)
 
