@@ -46,7 +46,6 @@ def read_chunk(
     chunk_size,
     stride,
     centers,
-    pace,
     left,
     right,
 ):
@@ -140,7 +139,7 @@ def read_chunk(
         elif m_mode == 0:
             height_step = height
             time_factor = current_step
-            time = height * time_factor * pace
+            time = height * time_factor
 
         bias_centered += height_step * (hill - hill_mean)
         removed_mean = r_length * dx * np.sum(bias_centered)
@@ -166,7 +165,7 @@ def read_chunk(
 def save_data_to_disk(
     method, total_steps, chunk_size, stride, seed, n_grid,
     filename, m_mode, k_mode, x, edges, dx, F, alpha, beta,
-    sigma, bias_factor, r_delta_T, height, centers, pace, left, right
+    sigma, bias_factor, r_delta_T, height, centers, left, right
     ):
 
     @njit
@@ -219,7 +218,7 @@ def save_data_to_disk(
             ) = read_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, height_step, start_step, chunk_size_valid, total_steps, stride, centers, pace,  left, right
+                height, height_step, start_step, chunk_size_valid, total_steps, stride, centers,  left, right
             )
 
             n_new_records = len(h_steps)
@@ -301,7 +300,6 @@ def main() -> None:
         r_delta_T=r_delta_T,
         height=cfg.height,
         centers=centers,
-        pace = cfg.deposition_pace,
         left=cfg.min,
         right=cfg.max
     )
