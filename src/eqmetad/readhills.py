@@ -228,7 +228,6 @@ def save_data_to_disk(
     bias_centered = np.zeros_like(x)
     bias_level = 0.0
     time = 0.0
-    height_step = 0.0
         
     total_saves = ( 1 + total_steps // stride
     + (1 if total_steps % stride != 0 else 0))
@@ -280,7 +279,7 @@ def save_data_to_disk(
             ) = read_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, total_steps, height_step, start_step, chunk_size_valid, stride, centers,  left, right
+                height, total_steps, start_step, chunk_size_valid, stride, centers,  left, right
             )
 
             n_new_records = len(h_steps)
