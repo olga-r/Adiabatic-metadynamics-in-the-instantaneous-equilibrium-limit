@@ -179,7 +179,7 @@ def save_data_to_disk(
     time = 0.0
     height_step = 0.0
         
-    total_saves = total_steps // stride
+    total_saves = total_steps // stride +1
 
     with h5py.File(filename, "w") as f:
         d_steps = f.create_dataset("steps", (total_saves,), dtype="i8")
