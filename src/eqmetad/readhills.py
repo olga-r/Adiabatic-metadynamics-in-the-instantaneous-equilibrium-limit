@@ -141,9 +141,10 @@ def read_chunk(
             height_step = height
             time_factor = current_step
             time = height * time_factor
-
+        
         bias_centered += height_step * (hill - hill_mean)
-        removed_mean = r_length * dx * np.sum(bias_centered)
+        bias_centered_interval = bias_centered[(x > left) & (x < right)]
+        removed_mean = r_length * dx * np.sum(bias_centered_interval)
         bias_centered -= removed_mean
 
         if m_mode == 1:
