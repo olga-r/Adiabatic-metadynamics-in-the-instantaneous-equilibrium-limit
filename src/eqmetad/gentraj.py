@@ -314,7 +314,7 @@ def run_simulation_to_disk(
                 
                 write_idx = next_idx
 
-            print(f"Progress: {start_step + chunk_size} / {total_steps} steps executed.")
+            print(f"Progress: {start_step + chunk_size_valid} / {total_steps} steps executed.")
 
 
 def main() -> None:
