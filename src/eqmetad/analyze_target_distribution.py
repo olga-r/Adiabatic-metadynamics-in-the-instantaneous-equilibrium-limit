@@ -53,13 +53,14 @@ def main() -> None:
     full_path = (current_dir / cfg.base_dir / cfg.filename).resolve()
     if cfg.potential != "none":
         f = h5py.File(full_path, 'r')
-        ( bias, hills_centers, time,
+        ( bias_pb, bias_pw, hills_centers, time,
         heights, steps, grid_edges, grid_centers
         )  = (  f['bias'][:],  f['centers'][:],
            f['time'][:], f['heights'][:], f['steps'][:],
            f['grid_edges'][:], f['grid_x'][:])
         dx = grid_edges[1]-grid_edges[0]
-        cell_mass =f['cell_mass'][:]
+        cell_mass_pb =f['cell_mass_pb'][:]
+        cell_mass_pw =f['cell_mass_pw'][:]
         kl_distance = np.zeros_like(steps, dtype=float)
         mass_in_peaks = np.zeros_like(steps, dtype=float)
         all_data = {}
@@ -67,7 +68,7 @@ def main() -> None:
         if cfg.method == "periodic":
             periodic=True
         for step_idx, step in enumerate(steps):
-            masses = np.squeeze(cell_mass[step_idx])
+            masses = np.squeeze(cell_mass_pw[step_idx])
             p = masses / dx
             if step_idx%plt_stride == 0:
                 plot_p(p, step,cfg.out_min, cfg.out_max)
@@ -99,7 +100,7 @@ def main() -> None:
         np.savetxt('mass_in_peaks.txt', mass_in_peaks)
         np.savetxt('KL_distance.txt', kl_distance)
         np.savetxt('time.txt', time)
-        np.save("p", f['cell_mass'][:]/dx)
+        np.save("pw", f['cell_mass_pw'][:]/dx)
         plot_masses(mass_in_peaks, time)
         plot_kl_distance(kl_distance, time)
 
