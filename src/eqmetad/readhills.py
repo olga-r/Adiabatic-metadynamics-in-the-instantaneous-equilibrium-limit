@@ -41,6 +41,7 @@ def read_chunk(
     bias_factor,
     r_delta_T,
     height,
+    height_step,
     start_step,
     chunk_size,
     stride,
@@ -85,7 +86,6 @@ def read_chunk(
     #####################
     for i in range(0, chunk_size):
         current_step = start_step + i
-        center = centers[current_step]
         
         # 1. save to disk
         if current_step % stride == 0:
@@ -105,31 +105,26 @@ def read_chunk(
                     history_bias[save_idx] = ab*bias_interval
             else:
                 history_bias[save_idx] = ab*bias_centered
-
-            history_center[save_idx] = center
+            if current_step == 0:
+                history_center[save_idx] = 0.5*(left+right)
+            else:
+                history_center[save_idx] = centers[current_step-1]
             history_height[save_idx] = height_step
             history_steps[save_idx] = current_step
             history_time[save_idx] = time
             save_idx += 1
             
-        if F is not None:
-            if method == 2:
-                cell_mass_from_bias_interval(
-                    bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
-                )
-            else:
-                cell_mass_from_bias(
-                    bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
-                )
+        #2. Sample distribution 
+        center = centers[current_step]
 
-        
-
+        #3. Compute hill and its mean
         if method != 0:
             hill = gaussian(x, center, gauss_val, sigma, k_mode)
             hill_mean = r_length * gaussian_integral_on_interval(center, sigma, k_mode, left, right)
         else:
             hill = gaussian_periodic(x, center, gauss_val, sigma, k_mode, left, right)
 
+        #4. Deposit hill and update V
         if m_mode == 1:
             center_clipped = max(left, min(center, right))
             if method == 0:
@@ -140,16 +135,6 @@ def read_chunk(
             height_step = hill_height(height, r_delta_T, bias_at_center)
             time_factor = np.exp(-r_delta_T * bias_level)
             time += height * time_factor
-
-            if current_step % stride == 0 and (F is not None):
-                if method == 2:
-                    cell_mass_from_bias_interval(
-                        bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
-                    )
-                else:
-                    cell_mass_from_bias(
-                        bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
-                    )
             bias_level += height_step * hill_mean
 
         elif m_mode == 0:
@@ -164,20 +149,11 @@ def read_chunk(
         if m_mode == 1:
             bias_level += removed_mean
 
-        if current_step % stride == 0:
-            history_bias[save_idx] = bias_centered
-            if F is not None:
-                history_mass[save_idx] = cell_mass
-            history_center[save_idx] = center
-            history_height[save_idx] = height_step
-            history_steps[save_idx] = current_step
-            history_time[save_idx] = time
-            save_idx += 1
-
     return (
         bias_centered,
         bias_level,
         time,
+        height_step,
         history_steps[:save_idx],
         history_center[:save_idx],
         history_height[:save_idx],
@@ -201,7 +177,8 @@ def save_data_to_disk(
     bias_centered = np.zeros_like(x)
     bias_level = 0.0
     time = 0.0
-
+    height_step = 0.0
+        
     total_saves = total_steps // stride
 
     with h5py.File(filename, "w") as f:
@@ -232,6 +209,7 @@ def save_data_to_disk(
                 bias_centered,
                 bias_level,
                 time,
+                height_step,
                 h_steps,
                 h_centers,
                 h_heights,
@@ -241,7 +219,7 @@ def save_data_to_disk(
             ) = read_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, start_step, chunk_size_valid, total_steps, stride, centers, pace,  left, right
+                height, height_step, start_step, chunk_size_valid, total_steps, stride, centers, pace,  left, right
             )
 
             n_new_records = len(h_steps)
