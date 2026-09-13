@@ -3,7 +3,8 @@ from scipy.signal import find_peaks
 from eqmetad.utils import smoothen_log_density
 
 def detect_peaks(dx, sigma, peak_threshold, filter_width, p, periodic=False):
-    smooth_logp = smoothen_log_density(p, filter_width)
+    mode = "wrap" if periodic else "nearest"
+    smooth_logp = smoothen_log_density(p, filter_width, mode)
     N = len(smooth_logp)
     boundary_window = max(5, int(round(sigma / dx)))
 
