@@ -86,7 +86,10 @@ def main() -> None:
                 filter_width=cfg.filter_width, p = p, periodic=periodic
             )
 
-            step_mass, step_data = analyze_peaks(peaks_indices=peak_indices, p=p, grid_centers=grid_centers_interval, masses=masses, left = cfg.min, right = cfg.max, periodic=periodic)
+            step_mass, step_data = analyze_peaks(
+                peaks_indices=peak_indices, p=p, grid_centers=grid_centers_interval, 
+                masses=masses, left = cfg.min, right = cfg.max, periodic=periodic
+            )
             mass_in_peaks[step_idx] = step_mass
             all_data[int(step)] = step_data
 
