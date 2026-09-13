@@ -66,6 +66,7 @@ def read_chunk(
     rho = np.empty_like(x)
     cell_mass = np.empty_like(x)
     gauss_val = np.empty_like(x)
+    bias_interval = np.empty_like(x)
 
     save_idx = 0
     r_length = 1.0 / (right - left)
@@ -218,7 +219,7 @@ def save_data_to_disk(
             ) = read_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, height_step, start_step, chunk_size_valid, total_steps, stride, centers,  left, right
+                height, height_step, start_step, chunk_size_valid, stride, centers,  left, right
             )
 
             n_new_records = len(h_steps)
@@ -285,7 +286,7 @@ def main() -> None:
         chunk_size=cfg.chunk_size,
         stride=cfg.stride,
         seed=cfg.seed,
-        n_grid==len(x),
+        n_grid=len(x),
         filename=full_path,
         m_mode=m_mode,
         k_mode=k_mode,
