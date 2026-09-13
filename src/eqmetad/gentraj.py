@@ -45,6 +45,8 @@ def run_chunk(
     bias_factor,
     r_delta_T,
     height,
+    center,
+    height_step,
     start_step,
     chunk_size,
     stride,
@@ -175,6 +177,8 @@ def run_chunk(
         bias_centered,
         bias_level,
         time,
+        center,
+        height_step,
         history_steps[:save_idx],
         history_center[:save_idx],
         history_height[:save_idx],
@@ -197,7 +201,8 @@ def run_simulation_to_disk(
     bias_centered = np.zeros_like(x)
     bias_level = 0.0
     time = 0.0
-
+    height_step = 0.0
+    center = 0.5*(left+right)
     total_saves = total_steps // stride
 
     with h5py.File(filename, "w") as f:
@@ -227,6 +232,8 @@ def run_simulation_to_disk(
                 bias_centered,
                 bias_level,
                 time,
+                center,
+                height_step,
                 h_steps,
                 h_centers,
                 h_heights,
@@ -236,7 +243,7 @@ def run_simulation_to_disk(
             ) = run_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, start_step, chunk_size_valid, stride, left, right
+                height, center, height_step, start_step, chunk_size_valid, stride, left, right
             )
 
             n_new_records = len(h_steps)
