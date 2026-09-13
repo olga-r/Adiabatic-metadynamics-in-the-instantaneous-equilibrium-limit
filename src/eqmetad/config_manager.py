@@ -45,12 +45,13 @@ def create_potential_file(custom_potential_file):
                min, max, out_min,and  out_max parameters should be set up in the job_config.json"""
             return np.zeros_like(x)
     ''')
+    with open(custom_potential_file, "w") as f:
+        f.write(template)
 
 def create_default_settings():
     with open(config_file, "w", encoding="utf-8") as f:
         json.dump(DEFAULT_CONFIG, f, indent=4)
-    with open(custom_potential_file, "w") as f:
-        f.write(template)
+    create_potential_file(custom_potential_file)
 
 def load_config() -> SimpleNamespace:
     with open(config_file, "r", encoding="utf-8") as f:
