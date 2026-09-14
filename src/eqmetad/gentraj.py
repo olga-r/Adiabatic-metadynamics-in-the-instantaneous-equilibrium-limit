@@ -324,8 +324,6 @@ def main() -> None:
     alpha = beta + r_delta_T if cfg.metad_mode == "wt" else beta
 
     k_mode = kernel_modes[cfg.kernel_mode]
-    if k_mode == 1:
-        cfg.height *= np.sqrt(2.0 * np.pi) * cfg.sigma
     m_mode = metad_modes[cfg.metad_mode]
 
     method = None
