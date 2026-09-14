@@ -38,19 +38,25 @@ def interp_periodic(x_val, x_first, dx, bias_array):
 
 @njit
 def interp(x_val, x_first, dx, bias_array):
-    idx = int((x_val - x_first) / dx)
+    idx = (x_val - x_first) / dx
+    n = len(bias_array)
 
     if idx < 0:
-        return bias_array[0]
-    if idx >= len(bias_array) - 1:
-        return bias_array[-1]
+        slope = (bias_array[1] - bias_array[0]) / dx
+        return bias_array[0] + slope * (x_val - x_first)
 
-    x0 = x_first + idx * dx
-    y0 = bias_array[idx]
-    y1 = bias_array[idx + 1]
-    weight = (x_val - x0) / dx
+    if idx >= n - 1:
+        x_last = x_first + (n - 1) * dx
+        slope = (bias_array[n - 1] - bias_array[n - 2]) / dx
+        return bias_array[n - 1] + slope * (x_val - x_last)
 
-    return y0 + (y1 - y0) * weight
+
+    i = int(idx)
+    x0 = x_first + i * dx
+    frac = (x_val - x0) / dx
+
+    return bias_array[i] + (bias_array[i + 1] - bias_array[i]) * frac
+
 
 
 @njit
