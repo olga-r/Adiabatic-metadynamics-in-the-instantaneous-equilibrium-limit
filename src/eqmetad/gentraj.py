@@ -189,14 +189,15 @@ def run_chunk(
                 time = height * time_coeff * time_factor
 
             bias_centered += height_step * (hill - hill_mean)
-            bias_centered_interval = bias_centered[(x > left) & (x < right)]
-            removed_mean = r_length * dx * np.sum(bias_centered_interval)
-            bias_centered -= removed_mean
+
+            if method == 3:
+                bias_centered_interval = bias_centered[(x > left) & (x < right)]
+                removed_mean = (r_length * dx * np.sum(bias_centered_interval))
+                bias_centered -= removed_mean    
+                if m_mode == 1:
+                    bias_level += removed_mean
         else:
             height_step = 0.0
-
-        if m_mode == 1:
-            bias_level += removed_mean
 
         # 4. save to disk
         if should_save:
