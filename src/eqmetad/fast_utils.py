@@ -80,6 +80,23 @@ def gaussian_periodic(x, center, gauss_val, sigma, kernel_mode, left, right):
         gauss_val[i] = np.exp(val * val * inv_two_sigma_sq) * norm
     return gauss_val
 
+
+@njit
+def gaussian_periodic( x, center, gauss_val, sigma, kernel_mode, left, right, n_images, norm):
+    d = x - center
+    L = right - left
+    d -= L * np.floor(d / L + 0.5)
+    inv_two_sigma_sq = -0.5 / (sigma * sigma)
+    value = 0.0
+
+    for k in range(-n_images, n_images + 1):
+        z = d + k * period
+        value += np.exp(
+            -z * z / (2.0 * sigma * sigma)
+        )
+
+    return value / norm
+
 @njit
 def gaussian(x, center, gauss_val, sigma, kernel_mode):
     # sqrt(2 * pi) = 2.5066282746310002
