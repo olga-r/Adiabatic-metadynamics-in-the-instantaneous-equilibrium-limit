@@ -86,9 +86,10 @@ def run_chunk(
     mcg_inv_mean = np.empty_like(x)
     deposit = True
 
-    if method == 0:
-        center_init = 0.5 * (left + right)
-        hill_mean = r_length * gaussian_integral_on_interval(center_init, sigma, k_mode, left, right)
+    if method == 0 and k_mode == 0:
+        hill_mean = r_length / k_mode_coeff
+    if method == 0 and k_mode == 1:
+        hill_mean = r_length      
     elif method == 2 or method == 3:
         s_clamped = np.clip(x, left, right)
         if method == 3:
