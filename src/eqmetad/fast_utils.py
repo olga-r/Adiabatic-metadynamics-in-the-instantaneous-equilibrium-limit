@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit
+import math
 
 @njit
 def erf_approx(x):
@@ -57,13 +58,9 @@ def interp(x_val, x_first, dx, bias_array):
 
     return bias_array[i] + (bias_array[i + 1] - bias_array[i]) * frac
 
-
-
 @njit
 def hill_height(height, r_delta_T, bias_at_center):
     return height * np.exp(-r_delta_T * bias_at_center)
-
-
 
 @njit
 def gaussian_periodic(x, center, gauss_val, sigma, left, right, n_images, norm):
@@ -83,7 +80,7 @@ def gaussian_periodic(x, center, gauss_val, sigma, left, right, n_images, norm):
             val = di + k_L[j]
             accum += np.exp(val * val * inv_two_sigma_sq)
             
-        gauss_val[i] += acc * norm
+        gauss_val[i] = accum * norm
     return gauss_val
 
 @njit
@@ -118,20 +115,19 @@ def sample_density(cell_mass, edges):
     return edges[chosen_idx] + (edges[chosen_idx + 1] - edges[chosen_idx]) * rand_shift
 
 @njit
-def gaussian_integral_on_interval(center, sigma, kernel_mode, left, right):
-    # sqrt(2) = 1.4142135623730951
-    sqrt2_sigma = 1.4142135623730951 * sigma
+def gaussian_integral_on_interval( center, sigma, kernel_mode, left, right):
+    # sqrt(2) = 1.4142135623730950488016887 
+    sqrt2_sigma = 1.4142135623730950488016887 * sigma
+
     a = (left - center) / sqrt2_sigma
     b = (right - center) / sqrt2_sigma
 
-    integral_normalized = 0.5 * (erf_approx(b) - erf_approx(a))
+    integral_normalized = 0.5 * ( math.erf(b) - math.erf(a)  )
 
     if kernel_mode == 1:
         return integral_normalized
-    else:
-        # sqrt(2 * pi) = 2.5066282746310002
-        return 2.5066282746310002 * sigma * integral_normalized
-
+     # sqrt(2 * pi) = 2.5066282746310005024157652 
+    return 2.5066282746310005024157652 * sigma * integral_normalized
 
 @njit
 def gaussian_mean_on_interval(center, sigma, kernel_mode, left, right):
@@ -154,8 +150,8 @@ def mcgovern_inverse_mean(x, inv_mean, sigma, kernel_mode, left,right):
 
 @njit
 def gaussian_mcgovern_interval(x, center, gauss_val, inv_mean, sigma, kernel_mode, left, right):
-    # sqrt(2 * pi) = 2.5066282746310002
-    norm = (1.0 if kernel_mode != 1 else 1.0 / (2.5066282746310002 * sigma))
+    # sqrt(2 * pi) = 2.5066282746310005024157652 
+    norm = (1.0 if kernel_mode != 1 else 1.0 / ( 2.5066282746310005024157652  * sigma))
     inv_two_sigma_sq = -0.5 / (sigma * sigma)
     for i in range(len(x)):
         s = x[i]
