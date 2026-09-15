@@ -74,7 +74,7 @@ def run_chunk(
     log_rho = np.empty_like(x)
     rho = np.empty_like(x)
     cell_mass = np.empty_like(x)
-    gauss_val = np.empty_like(x)
+    gauss_val = np.zeros_like(x)
     bias_interval = np.empty_like(x)
 
     save_idx = 0
