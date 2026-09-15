@@ -82,7 +82,7 @@ def gaussian_periodic(x, center, gauss_val, sigma, kernel_mode, left, right):
 
 
 @njit
-def gaussian_periodic( x, center, gauss_val, sigma, kernel_mode, left, right, n_images, norm):
+def gaussian_periodic( x, center, gauss_val, sigma,  left, right, n_images, norm):
     inv_two_sigma_sq = -0.5 / (sigma * sigma)
     d = x - center
     L = right - left
