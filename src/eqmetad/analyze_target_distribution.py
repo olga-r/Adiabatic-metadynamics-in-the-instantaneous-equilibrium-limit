@@ -72,7 +72,7 @@ def main() -> None:
             p = masses / dx
             if step_idx%plt_stride == 0:
                 plot_p(p, step,cfg.out_min, cfg.out_max)
-            if cfg.method == "interval":
+            if cfg.method in ("interval", "mcgovern_interval"):
                 p = p[(grid_centers > cfg.min) & (grid_centers < cfg.max)]
                 masses = masses[(grid_centers > cfg.min) & (grid_centers < cfg.max)]
                 grid_centers_interval = grid_centers[(grid_centers > cfg.min) & (grid_centers < cfg.max)]
