@@ -336,7 +336,7 @@ def main() -> None:
 
     k_mode = kernel_modes[cfg.kernel_mode]
     m_mode = metad_modes[cfg.metad_mode]
-    n_images, peak_norm, integral_norm = 1, 1, 1
+    n_images, peak_norm, integral_norm = 0, 1.0, 1.0
 
     method = None
     if cfg.method == "periodic":
