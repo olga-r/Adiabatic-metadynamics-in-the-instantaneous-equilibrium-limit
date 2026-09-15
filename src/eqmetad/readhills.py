@@ -153,9 +153,7 @@ def read_chunk(
             bias_at_center += bias_level
             height_step = hill_height(height, r_delta_T, bias_at_center)
             time_factor = np.exp(-r_delta_T * bias_level)
-            time += height * time_factor
-            if k_mode == 1:
-                time *= k_mode_coeff
+            time += height * time_factor * (k_mode_coeff if k_mode == 1 else 1)
             bias_level += height_step * hill_mean
 
         elif m_mode == 0:
@@ -318,13 +316,15 @@ def main() -> None:
 
     k_mode = kernel_modes[cfg.kernel_mode]
     m_mode = metad_modes[cfg.metad_mode]
-
+    n_images, peak_norm, integral_norm = 0, 1.0, 1.0
+    
     method = None
     if cfg.method == "periodic":
         x, edges, dx = make_grid(cfg.min, cfg.max, cfg.n_grid)
         method = 0
         n_images, peak_norm, integral_norm = (
             periodic_kernel_parameters(cfg.sigma, cfg.min, cfg.max, cfg.periodic_tol)
+        )
     elif cfg.method == "bounds":
         x, edges, dx = make_grid(cfg.min, cfg.max, cfg.n_grid)
         method = 1
