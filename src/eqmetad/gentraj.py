@@ -151,7 +151,7 @@ def run_chunk(
 
         #2. Compute hill and its mean
         if method == 0:
-            hill = gaussian_periodic(x, center, gauss_val, sigma, k_mode, left, right, norm)
+            hill = gaussian_periodic(x, center, gauss_val, sigma, left, right, n_images, norm)
         elif method == 3:
             deposit = (center >= left) and (center <= right)
             if deposit:
