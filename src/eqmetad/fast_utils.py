@@ -63,38 +63,28 @@ def interp(x_val, x_first, dx, bias_array):
 def hill_height(height, r_delta_T, bias_at_center):
     return height * np.exp(-r_delta_T * bias_at_center)
 
+
+
 @njit
-def gaussian_periodic(x, center, gauss_val, sigma, kernel_mode, left, right):
-    L = right - left
-    half_L = L / 2.0
-    inv_L = 1.0 / L
-
-    # sqrt(2 * pi) = 2.5066282746310002
-    norm = 1.0 if kernel_mode != 1 else (1.0 / (2.5066282746310002 * sigma))
-
+def gaussian_periodic(x, center, gauss_val, sigma, left, right, n_images, norm):
     inv_two_sigma_sq = -0.5 / (sigma * sigma)
+    L = right - left
     n = len(x)
-    for i in range(n):
-        val = x[i] - center + half_L
-        val = val - np.floor(val * inv_L) * L - half_L
-        gauss_val[i] = np.exp(val * val * inv_two_sigma_sq) * norm
-    return gauss_val
 
-
-@njit
-def gaussian_periodic( x, center, gauss_val, sigma,  left, right, n_images, norm):
-    inv_two_sigma_sq = -0.5 / (sigma * sigma)
-    d = x - center
-    L = right - left
-    d -= L * np.floor(d / L + 0.5)
+    k_values = np.arange(-n_images, n_images + 1)
+    k_L = k_values * L
     
-    n = len(x)
     for i in range(n):
-        for k in range(-n_images, n_images + 1):
-            val = d[i] + k * L
-            gauss_val[i] += np.exp( -val* val * inv_two_sigma_sq) 
-
-    return gauss_val * norm
+        di = x[i] - center
+        di -= L * np.floor(di / L + 0.5)
+        
+        accum = 0.0
+        for j in range(len(k_L)):
+            val = di + k_L[j]
+            accum += np.exp(val * val * inv_two_sigma_sq)
+            
+        gauss_val[i] += acc * norm
+    return gauss_val
 
 @njit
 def gaussian(x, center, gauss_val, sigma, kernel_mode):
