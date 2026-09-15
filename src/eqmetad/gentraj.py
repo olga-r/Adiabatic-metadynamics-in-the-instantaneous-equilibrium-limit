@@ -59,7 +59,7 @@ def run_chunk(
     bias_level = bias_level_init
     time = time_init
     k_mode_coeff = peak_norm / integral_norm
-    norm = peak_norm if k_mode == 0 else integral_norm
+    norm = 1/peak_norm if k_mode == 0 else 1/integral_norm
 
     max_saves = chunk_size // stride + 2
     history_bias_pb = np.empty((max_saves, len(x)), dtype=np.float64)
