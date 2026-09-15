@@ -60,8 +60,6 @@ def read_chunk(
         time_coeff = 1.0
     elif method == 0:  # periodic, unit_integral
         time_coeff = peak_norm / integral_norm
-    elif method == 3:  # McGovern
-        time_coeff = 1.0
     else:  # bounds / interval, unit_integral
         time_coeff = 1.0 / (np.sqrt(2.0 * np.pi) * sigma)
     
@@ -169,12 +167,6 @@ def read_chunk(
             time = height * time_coeff * time_factor
         
         bias_centered += height_step * (hill - hill_mean)
-        bias_centered_interval = bias_centered[(x > left) & (x < right)]
-        removed_mean = r_length * dx * np.sum(bias_centered_interval)
-        bias_centered -= removed_mean
-
-        if m_mode == 1:
-            bias_level += removed_mean
         
         # 4. save to disk
         if should_save:
