@@ -6,7 +6,7 @@ from numba import njit
 import importlib.util
 import h5py
 from eqmetad.potentials import constant
-from eqmetad.utils import make_nested_grid, make_grid, import_custom_potential
+from eqmetad.utils import make_nested_grid, make_grid, import_custom_potential, periodic_kernel_parameters
 from eqmetad.fast_utils import (
     cell_mass_from_bias,
     cell_mass_from_bias_interval,
@@ -51,12 +51,15 @@ def run_chunk(
     stride,
     left,
     right,
+    n_images, 
+    peak_norm, 
+    integral_norm
 ):
     bias_centered = bias_init.copy()
     bias_level = bias_level_init
     time = time_init
-    k_mode_coeff = 1/(np.sqrt(2.0 * np.pi) * sigma)
-
+    k_mode_coeff = peak_norm / integral_norm
+    norm = peak_norm if k_mode == 0 else integral_norm
 
     max_saves = chunk_size // stride + 2
     history_bias_pb = np.empty((max_saves, len(x)), dtype=np.float64)
@@ -148,7 +151,7 @@ def run_chunk(
 
         #2. Compute hill and its mean
         if method == 0:
-            hill = gaussian_periodic(x, center, gauss_val, sigma, k_mode, left, right)
+            hill = gaussian_periodic(x, center, gauss_val, sigma, k_mode, left, right, norm)
         elif method == 3:
             deposit = (center >= left) and (center <= right)
             if deposit:
@@ -242,7 +245,7 @@ def run_chunk(
 def run_simulation_to_disk(
     method, total_steps, chunk_size, stride, seed, n_grid,
     filename, m_mode, k_mode, x, edges, dx, F, alpha, beta,
-    sigma, bias_factor, r_delta_T, height, left, right
+    sigma, bias_factor, r_delta_T, height, left, right,n_images, peak_norm, integral_norm
     ):
 
     @njit
@@ -302,7 +305,8 @@ def run_simulation_to_disk(
             ) = run_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, total_steps, start_step, chunk_size_valid, stride, left, right
+                height, total_steps, start_step, chunk_size_valid, stride, left, right,
+                n_images, peak_norm, integral_norm
             )
 
             n_new_records = len(h_steps)
@@ -331,11 +335,15 @@ def main() -> None:
 
     k_mode = kernel_modes[cfg.kernel_mode]
     m_mode = metad_modes[cfg.metad_mode]
+    n_images, peak_norm, integral_norm = 1, 1, 1
 
     method = None
     if cfg.method == "periodic":
         x, edges, dx = make_grid(cfg.min, cfg.max, cfg.n_grid)
         method = 0
+        n_images, peak_norm, integral_norm = (
+            periodic_kernel_parameters(cfg.sigma, cfg.min, cfg.max, cfg.periodic_tol)
+        )
     elif cfg.method == "bounds":
         x, edges, dx = make_grid(cfg.min, cfg.max, cfg.n_grid)
         method = 1
@@ -381,6 +389,9 @@ def main() -> None:
         height=cfg.height,
         left=cfg.min,
         right=cfg.max
+        n_images = n_images,
+        peak_norm = peak_norm,
+        integral_norm = integral_norm
     )
 
 if __name__ == "__main__":
