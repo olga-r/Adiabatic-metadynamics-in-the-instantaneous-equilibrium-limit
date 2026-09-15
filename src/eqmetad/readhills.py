@@ -5,7 +5,7 @@ import numpy as np
 from numba import njit
 import h5py
 from eqmetad.potentials import constant
-from eqmetad.utils import make_nested_grid, make_grid, import_custom_potential
+from eqmetad.utils import make_nested_grid, make_grid, import_custom_potential, periodic_kernel_parameters
 from eqmetad.fast_utils import (
     cell_mass_from_bias,
     cell_mass_from_bias_interval,
@@ -48,11 +48,16 @@ def read_chunk(
     centers,
     left,
     right,
+    n_images, 
+    peak_norm, 
+    integral_norm
 ):
     bias_centered = bias_init.copy()
     bias_level = bias_level_init
     time = time_init
-    k_mode_coeff = 1/(np.sqrt(2.0 * np.pi) * sigma)
+    k_mode_coeff = peak_norm / integral_norm
+    norm = 1/peak_norm if k_mode == 0 else 1/integral_norm
+    
 
     max_saves = chunk_size // stride + 2
     history_bias_pb = np.empty((max_saves, len(x)), dtype=np.float64)
@@ -67,7 +72,7 @@ def read_chunk(
     log_rho = np.empty_like(x)
     rho = np.empty_like(x)
     cell_mass = np.empty_like(x)
-    gauss_val = np.empty_like(x)
+    gauss_val = np.zeros_like(x)
     bias_interval = np.empty_like(x)
 
     save_idx = 0
@@ -77,9 +82,10 @@ def read_chunk(
     hill_mean = 0.0
     s_clamped = x
 
-    if method == 0:
-        center_init = 0.5 * (left + right)
-        hill_mean = r_length * gaussian_integral_on_interval(center_init, sigma, k_mode, left, right)
+    if method == 0 and k_mode == 0:
+        hill_mean = r_length / k_mode_coeff
+    if method == 0 and k_mode == 1:
+        hill_mean = r_length    
     elif method == 2:
         s_clamped = np.clip(x, left, right)
 
@@ -135,8 +141,8 @@ def read_chunk(
             hill = gaussian(x, center, gauss_val, sigma, k_mode)
             hill_mean = r_length * gaussian_integral_on_interval(center, sigma, k_mode, left, right)
         else:
-            hill = gaussian_periodic(x, center, gauss_val, sigma, k_mode, left, right)
-
+            hill = gaussian_periodic(x, center, gauss_val, sigma, left, right, n_images, norm)
+            
         #3. Deposit hill and update V
         if m_mode == 1:
             center_clipped = max(left, min(center, right))
@@ -220,7 +226,7 @@ def read_chunk(
 def save_data_to_disk(
     method, total_steps, chunk_size, stride, seed, n_grid,
     filename, m_mode, k_mode, x, edges, dx, F, alpha, beta,
-    sigma, bias_factor, r_delta_T, height, centers, left, right
+    sigma, bias_factor, r_delta_T, height, centers, left, right, n_images, peak_norm, integral_norm
     ):
 
     @njit
@@ -282,7 +288,8 @@ def save_data_to_disk(
             ) = read_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, time,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
-                height, total_steps, start_step, chunk_size_valid, stride, centers,  left, right
+                height, total_steps, start_step, chunk_size_valid, stride, centers,  left, right,
+                n_images, peak_norm, integral_norm
             )
 
             n_new_records = len(h_steps)
@@ -316,6 +323,8 @@ def main() -> None:
     if cfg.method == "periodic":
         x, edges, dx = make_grid(cfg.min, cfg.max, cfg.n_grid)
         method = 0
+        n_images, peak_norm, integral_norm = (
+            periodic_kernel_parameters(cfg.sigma, cfg.min, cfg.max, cfg.periodic_tol)
     elif cfg.method == "bounds":
         x, edges, dx = make_grid(cfg.min, cfg.max, cfg.n_grid)
         method = 1
@@ -364,7 +373,10 @@ def main() -> None:
         height=cfg.height,
         centers=centers,
         left=cfg.min,
-        right=cfg.max
+        right=cfg.max,
+        n_images = n_images,
+        peak_norm = peak_norm,
+        integral_norm = integral_norm
     )
 
 if __name__ == "__main__":
