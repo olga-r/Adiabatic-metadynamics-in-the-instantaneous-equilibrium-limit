@@ -25,14 +25,14 @@ def plot_masses(mass_in_peaks, time):
     ax1.plot(time, mass_in_peaks, lw = 1, c="b")
     fig.savefig(os.path.normpath('./mass_in_peaks.png'))
 
-def plot_p(p, step, left, right):
+def plot_p(p, step, grid_centers):
     fig = Figure(linewidth=4, figsize = (7,6), dpi =300)
     gs = mpl.gridspec.GridSpec(nrows=1, ncols=1, left =0.1, right=0.95, bottom=0.17, top=0.92,  wspace=0.4, hspace=0.2)
     ax1 = fig.add_subplot(gs[0,0])
     ax1.set_ylim(-0.2, 10)
     ax1.set_xlabel("x")
     ax1.set_ylabel("p")
-    ax1.plot(np.arange(left, right, (right-left)/len(p)),p, lw = 1, c="b")
+    ax1.plot(grid_centers,p, lw = 1, c="b")
     fig.savefig(os.path.normpath('./p_step={}.png'.format(step)))
 
 def plot_kl_distance(distance, time):
