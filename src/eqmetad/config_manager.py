@@ -12,6 +12,7 @@ custom_potential_file =  (current_dir / "custom_potential.py").resolve()
 DEFAULT_CONFIG: Dict[str, Any] = {
     "method": "bounds", #"interval", "periodic", "mcgovern_interval"
     "metad_mode": "wt",
+    "periodic_tol": 1e-14,
     "n_grid": 2000,
     "sigma": 0.15,
     "kBT": 1.0,
