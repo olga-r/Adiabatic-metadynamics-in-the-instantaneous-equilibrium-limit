@@ -389,7 +389,7 @@ def main() -> None:
         r_delta_T=r_delta_T,
         height=cfg.height,
         left=cfg.min,
-        right=cfg.max
+        right=cfg.max,
         n_images = n_images,
         peak_norm = peak_norm,
         integral_norm = integral_norm
