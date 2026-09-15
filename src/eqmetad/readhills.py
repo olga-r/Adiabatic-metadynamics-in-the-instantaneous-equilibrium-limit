@@ -52,6 +52,7 @@ def read_chunk(
     bias_centered = bias_init.copy()
     bias_level = bias_level_init
     time = time_init
+    k_mode_coeff = 1/(np.sqrt(2.0 * np.pi) * sigma)
 
     max_saves = chunk_size // stride + 2
     history_bias_pb = np.empty((max_saves, len(x)), dtype=np.float64)
@@ -147,12 +148,16 @@ def read_chunk(
             height_step = hill_height(height, r_delta_T, bias_at_center)
             time_factor = np.exp(-r_delta_T * bias_level)
             time += height * time_factor
+            if k_mode == 1:
+                time *= k_mode_coeff
             bias_level += height_step * hill_mean
 
         elif m_mode == 0:
             height_step = height
             time_factor = current_step
             time = height * time_factor
+            if k_mode == 1:
+                time *= k_mode_coeff
         
         bias_centered += height_step * (hill - hill_mean)
         bias_centered_interval = bias_centered[(x > left) & (x < right)]
