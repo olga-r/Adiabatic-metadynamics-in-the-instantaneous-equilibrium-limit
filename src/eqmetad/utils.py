@@ -3,6 +3,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter1d
 import os
 import importlib.util
+import math
 
 def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
@@ -43,7 +44,24 @@ def make_nested_grid(out_left, out_right, left, right, n_grid):
 
     return x, edges, dx
 
+def periodic_kernel_parameters(sigma, left, right, tol=1e-14):
+    L = right - left
 
+    n_images = max( 0,
+        int(np.ceil( sigma / L * np.sqrt(2.0 * np.log(2.0 / tol))- 0.5
+    )))
+
+    peak_norm = 1.0
+    for k in range(1, n_images + 1):
+        peak_norm += 2.0 * np.exp(
+            -(k * L) ** 2 / (2.0 * sigma ** 2)
+        )
+
+    integral_norm = (
+        np.sqrt(2.0 * np.pi) * sigma
+        * math.erf((n_images + 0.5) * L  / (np.sqrt(2.0) * sigma)
+    ))
+    return n_images, peak_norm, integral_norm
 
 def import_custom_potential(module_name="custom_potential", func_name="custom"):
     cwd = os.getcwd()
