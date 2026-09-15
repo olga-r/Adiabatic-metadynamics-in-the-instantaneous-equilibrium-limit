@@ -94,7 +94,7 @@ def run_chunk(
     deposit = True
 
     if method == 0 and k_mode == 0:
-        hill_mean = r_length / k_mode_coeff
+        hill_mean = r_length * integral_norm / peak_norm  
     if method == 0 and k_mode == 1:
         hill_mean = r_length      
     elif method == 2 or method == 3:
