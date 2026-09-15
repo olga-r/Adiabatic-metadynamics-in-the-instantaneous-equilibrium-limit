@@ -58,7 +58,6 @@ def run_chunk(
     bias_centered = bias_init.copy()
     bias_level = bias_level_init
     time = time_init
-    k_mode_coeff = peak_norm / integral_norm
     norm = 1/peak_norm if k_mode == 0 else 1/integral_norm
     if k_mode == 0:  # unit_peak
         time_coeff = 1.0
