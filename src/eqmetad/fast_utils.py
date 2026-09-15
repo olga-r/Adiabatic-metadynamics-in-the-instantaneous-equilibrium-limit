@@ -3,25 +3,6 @@ from numba import njit
 import math
 
 @njit
-def erf_approx(x):
-    # Constants for Chebyshev numerical approximation
-    a1 = 0.254829592
-    a2 = -0.284496736
-    a3 = 1.421413741
-    a4 = -1.453152027
-    a5 = 1.061405429
-    p = 0.3275911
-
-    sign = 1.0 if x >= 0 else -1.0
-    abs_x = abs(x)
-    t = 1.0 / (1.0 + p * abs_x)
-    y = 1.0 - (
-        ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * np.exp(-abs_x * abs_x)
-    )
-    return sign * y
-
-
-@njit
 def interp_periodic(x_val, x_first, dx, bias_array):
     n = len(bias_array)
     delta = x_val - x_first
