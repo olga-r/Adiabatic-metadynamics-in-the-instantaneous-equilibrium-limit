@@ -101,6 +101,7 @@ def main() -> None:
         np.savetxt('KL_distance.txt', kl_distance)
         np.savetxt('time.txt', time)
         np.save("pw", f['cell_mass_pw'][:]/dx)
+        np.save("pb", f['cell_mass_pb'][:]/dx)
         plot_masses(mass_in_peaks, time)
         plot_kl_distance(kl_distance, time)
 
