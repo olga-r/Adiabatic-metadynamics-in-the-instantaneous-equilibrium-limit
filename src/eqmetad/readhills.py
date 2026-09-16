@@ -198,7 +198,7 @@ def read_chunk(
                 history_bias_pb[save_idx] = bias_centered
             
             history_center[save_idx] = center
-            history_height[save_idx] = height_step
+            history_height[save_idx] = height_step*ab
             history_steps[save_idx] = current_step
             history_time[save_idx] = time
             save_idx += 1 
