@@ -266,7 +266,6 @@ def save_data_to_disk(
                 h_centers,
                 h_heights,
                 h_bias_pb,
-                h_bias_pw,
                 h_mass_pb,
                 h_mass_pw,
                 h_time
