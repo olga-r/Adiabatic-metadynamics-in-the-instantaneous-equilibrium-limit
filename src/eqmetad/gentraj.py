@@ -70,7 +70,6 @@ def run_chunk(
     
     max_saves = chunk_size // stride + 2
     history_bias_pb = np.empty((max_saves, len(x)), dtype=np.float64)
-    history_bias_pw = np.empty((max_saves, len(x)), dtype=np.float64)
     history_mass_pb = np.empty((max_saves, len(x)), dtype=np.float64)
     history_mass_pw = np.empty((max_saves, len(x)), dtype=np.float64)
     history_center = np.empty(max_saves, dtype=np.float64)
@@ -115,7 +114,6 @@ def run_chunk(
             history_mass_pb[save_idx] = cell_mass 
             for i in range(len(s_clamped)):
                 bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
-            history_bias_pw[save_idx] = ab*bias_interval
             history_bias_pb[save_idx] = bias_interval
         else:
             cell_mass_from_bias(
@@ -126,7 +124,6 @@ def run_chunk(
                 bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
             )
             history_mass_pb[save_idx] = cell_mass
-            history_bias_pw[save_idx] = ab*bias_centered
             history_bias_pb[save_idx] = bias_centered
             
         history_center[save_idx] = np.nan
@@ -212,7 +209,6 @@ def run_chunk(
                 history_mass_pb[save_idx] = cell_mass 
                 for i in range(len(s_clamped)):
                     bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
-                history_bias_pw[save_idx] = ab*bias_interval
                 history_bias_pb[save_idx] = bias_interval
             else:
                 cell_mass_from_bias(
@@ -223,7 +219,6 @@ def run_chunk(
                     bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
                 )
                 history_mass_pb[save_idx] = cell_mass
-                history_bias_pw[save_idx] = ab*bias_centered
                 history_bias_pb[save_idx] = bias_centered
             
             history_center[save_idx] = center
@@ -240,7 +235,6 @@ def run_chunk(
         history_center[:save_idx],
         history_height[:save_idx],
         history_bias_pb[:save_idx],
-        history_bias_pw[:save_idx],
         history_mass_pb[:save_idx],
         history_mass_pw[:save_idx],
         history_time[:save_idx]
@@ -273,10 +267,6 @@ def run_simulation_to_disk(
             "bias_pb", (total_saves, n_grid), dtype="f8",
             compression="gzip", chunks=(min(100, total_saves), n_grid)
         )
-        d_bias_pw = f.create_dataset(
-            "bias_pw", (total_saves, n_grid), dtype="f8",
-            compression="gzip", chunks=(min(100, total_saves), n_grid)
-        )
         
         d_mass_pb = f.create_dataset(
             "cell_mass_pb", (total_saves, n_grid), dtype="f8",
@@ -302,7 +292,6 @@ def run_simulation_to_disk(
                 h_centers,
                 h_heights,
                 h_bias_pb,
-                h_bias_pw,
                 h_mass_pb,
                 h_mass_pw,
                 h_time
@@ -321,8 +310,7 @@ def run_simulation_to_disk(
                 d_time[write_idx:next_idx] = h_time
                 d_centers[write_idx:next_idx] = h_centers
                 d_heights[write_idx:next_idx] = h_heights
-                d_bias_pb[write_idx:next_idx, :] = h_bias_pb
-                d_bias_pw[write_idx:next_idx, :] = h_bias_pw                
+                d_bias_pb[write_idx:next_idx, :] = h_bias_pb              
                 d_mass_pb[write_idx:next_idx, :] = h_mass_pb
                 d_mass_pw[write_idx:next_idx, :] = h_mass_pw
                 
