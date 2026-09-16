@@ -99,12 +99,13 @@ def main() -> None:
             json.dump(all_data, ff, indent=4)
         np.savetxt('mass_in_peaks.txt', mass_in_peaks)
         np.savetxt('KL_distance.txt', kl_distance)
-        if cfg.debug:
-            np.savetxt('heights.txt', heights)
-            np.savetxt('centers.txt', hills_centers)
+        np.savetxt('heights.txt', heights)
+        np.savetxt('centers.txt', hills_centers)
         np.savetxt('time.txt', time)
         np.save("pw", f['cell_mass_pw'][:]/dx)
         np.save("pb", f['cell_mass_pb'][:]/dx)
+        np.save("bias_pw", bias_pw)
+        np.save("bias_pb", bias_pb)
         plot_masses(mass_in_peaks, time)
         plot_kl_distance(kl_distance, time)
 
