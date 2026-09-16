@@ -47,15 +47,22 @@ def plot_kl_distance(distance, time):
 
 def main() -> None:
     cfg = load_config()
+    beta = 1.0 / cfg.kBT
+    r_delta_T = beta / (cfg.bias_factor - 1.0) if cfg.metad_mode == "wt" else -1
+    alpha = beta + r_delta_T if cfg.metad_mode == "wt" else beta
+    ab = alpha/beta
+    
     plt_stride = max(1, round(cfg.plot_stride / cfg.stride)) if cfg.plot_stride>=cfg.stride else cfg.plot_stride
     print(f"Plotting every {plt_stride } saved frames.")
+    
     current_dir = Path(os.getcwd())
     full_path = (current_dir / cfg.base_dir / cfg.filename).resolve()
+    
     if cfg.potential != "none":
         f = h5py.File(full_path, 'r')
-        ( bias_pb, bias_pw, hills_centers, time,
+        ( bias_pb, hills_centers, time,
         heights, steps, grid_edges, grid_centers
-        )  = (  f['bias_pb'][:],  f['bias_pw'][:],  f['centers'][:],
+        )  = (  f['bias_pb'][:],   f['centers'][:],
            f['time'][:], f['heights'][:], f['steps'][:],
            f['grid_edges'][:], f['grid_x'][:])
         dx = grid_edges[1]-grid_edges[0]
@@ -99,12 +106,13 @@ def main() -> None:
             json.dump(all_data, ff, indent=4)
         np.savetxt('mass_in_peaks.txt', mass_in_peaks)
         np.savetxt('KL_distance.txt', kl_distance)
-        np.savetxt('heights.txt', heights)
+        np.savetxt('heights_pb.txt', heights)
+        np.savetxt('heights_pw.txt', heights*ab)
         np.savetxt('centers.txt', hills_centers)
         np.savetxt('time.txt', time)
         np.save("pw", f['cell_mass_pw'][:]/dx)
         np.save("pb", f['cell_mass_pb'][:]/dx)
-        np.save("bias_pw", bias_pw)
+        np.save("bias_pw", bias_pb*ab)
         np.save("bias_pb", bias_pb)
         plot_masses(mass_in_peaks, time)
         plot_kl_distance(kl_distance, time)
