@@ -201,6 +201,14 @@ def run_chunk(
                 if m_mode == 1:
                     bias_level += removed_mean
             if m_mode == 1:
+                if method == 2 or method == 3:
+                    logZb = cell_mass_from_bias_interval(
+                        bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
+                    )
+                else:
+                    logZb = cell_mass_from_bias(
+                        bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
+                    )
                 delta_theta = calc_theta_step(bias_centered, cell_mass, r_delta_T, delta_tau)
                 theta += delta_theta 
             else:
