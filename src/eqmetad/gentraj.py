@@ -211,11 +211,11 @@ def run_chunk(
         # 4. save to disk
         if should_save:
             if method == 2 or method==3:
-                cell_mass_from_bias_interval(
+                logZw = cell_mass_from_bias_interval(
                      bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
                 )
                 history_mass_pw[save_idx] = cell_mass
-                cell_mass_from_bias_interval(
+                logZb = cell_mass_from_bias_interval(
                      bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
                 )
                 history_mass_pb[save_idx] = cell_mass 
@@ -223,11 +223,11 @@ def run_chunk(
                     bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
                 history_bias_pb[save_idx] = bias_interval
             else:
-                cell_mass_from_bias(
+                logZw = cell_mass_from_bias(
                     bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
                 )
                 history_mass_pw[save_idx] = cell_mass
-                cell_mass_from_bias(
+                logZb = cell_mass_from_bias(
                     bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
                 )
                 history_mass_pb[save_idx] = cell_mass
