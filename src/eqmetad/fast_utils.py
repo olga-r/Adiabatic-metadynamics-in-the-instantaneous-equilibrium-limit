@@ -211,3 +211,12 @@ def cell_mass_from_bias_interval(V, F, s_clamped, x, log_rho, rho, cell_mass, be
         cell_mass[i] *= inv_total
     return logZ
 
+@njit
+def calc_theta_step(V_zero_mean, cell_mass, r_delta_T, delta_tau):
+    n = len(V_zero_mean)
+    accum = 0.0
+    for i in range(n):
+        accum += np.exp(-V_zero_mean[i] * r_delta_T) * cell_mass[i]
+    return delta_tau * accum
+    
+
