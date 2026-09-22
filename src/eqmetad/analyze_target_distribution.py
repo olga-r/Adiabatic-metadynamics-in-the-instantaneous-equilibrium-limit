@@ -48,7 +48,7 @@ def plot_kl_distance(distance, time):
 def main() -> None:
     cfg = load_config()
     beta = 1.0 / cfg.kBT
-    r_delta_T = beta / (cfg.bias_factor - 1.0) if cfg.metad_mode == "wt" else -1
+    r_delta_T = beta / (cfg.bias_factor - 1.0) if cfg.metad_mode == "wt" else 0
     alpha = beta + r_delta_T if cfg.metad_mode == "wt" else beta
     ab = alpha/beta
     
@@ -60,10 +60,10 @@ def main() -> None:
     
     if cfg.potential != "none":
         f = h5py.File(full_path, 'r')
-        ( bias_pb, hills_centers, time,
+        ( bias_pb, hills_centers, time, theta,
         heights, steps, grid_edges, grid_centers
         )  = (  f['bias_pb'][:],   f['centers'][:],
-           f['time'][:], f['heights'][:], f['steps'][:],
+           f['time'][:],  f['theta'][:], f['heights'][:], f['steps'][:],
            f['grid_edges'][:], f['grid_x'][:])
         dx = grid_edges[1]-grid_edges[0]
         cell_mass_pb =f['cell_mass_pb'][:]
@@ -109,7 +109,9 @@ def main() -> None:
         np.savetxt('heights_pb.txt', heights)
         np.savetxt('heights_pw.txt', heights*ab)
         np.savetxt('centers.txt', hills_centers)
-        np.savetxt('time.txt', time)
+        np.savetxt( 'time.txt', np.column_stack((time, theta, theta*alpha)),
+                   header="time     theta     norm_theta"
+                  )
         np.save("pw", f['cell_mass_pw'][:]/dx)
         np.save("pb", f['cell_mass_pb'][:]/dx)
         np.save("bias_pw", bias_pb*ab)
