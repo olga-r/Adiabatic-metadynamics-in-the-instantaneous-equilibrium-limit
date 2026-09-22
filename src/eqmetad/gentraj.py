@@ -19,7 +19,8 @@ from eqmetad.fast_utils import (
     interp,
     mcgovern_inverse_mean,
     gaussian_mcgovern_interval,
-    grid_mean_on_interval
+    grid_mean_on_interval,
+    calc_theta_step
 )
 from eqmetad.config_manager import load_config
 
@@ -35,6 +36,7 @@ def run_chunk(
     bias_init,
     bias_level_init,
     time_init,
+    theta_init,
     x,
     edges,
     dx,
@@ -58,6 +60,8 @@ def run_chunk(
     bias_centered = bias_init.copy()
     bias_level = bias_level_init
     time = time_init
+    theta = theta_init
+    
     norm = 1/peak_norm if k_mode == 0 else 1/integral_norm
     if k_mode == 0:  # unit_peak
         time_coeff = 1.0
@@ -76,6 +80,7 @@ def run_chunk(
     history_height = np.empty(max_saves, dtype=np.float64)
     history_steps = np.empty(max_saves, dtype=np.int64)
     history_time = np.empty(max_saves, dtype=np.float64)
+    history_theta = np.empty(max_saves, dtype=np.float64)
 
     log_rho = np.empty_like(x)
     rho = np.empty_like(x)
@@ -104,11 +109,11 @@ def run_chunk(
     # save zero step to disk
     if start_step == 0:
         if method == 2 or method==3:
-            cell_mass_from_bias_interval(
+            logZw = cell_mass_from_bias_interval(
                  bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
             )
             history_mass_pw[save_idx] = cell_mass
-            cell_mass_from_bias_interval(
+            logZb = cell_mass_from_bias_interval(
                  bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
             )
             history_mass_pb[save_idx] = cell_mass 
@@ -116,11 +121,11 @@ def run_chunk(
                 bias_interval[i] = interp(s_clamped[i], x[0], dx, bias_centered)
             history_bias_pb[save_idx] = bias_interval
         else:
-            cell_mass_from_bias(
+            logZw = cell_mass_from_bias(
                 bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
             )
             history_mass_pw[save_idx] = cell_mass
-            cell_mass_from_bias(
+            logZb = cell_mass_from_bias(
                 bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
             )
             history_mass_pb[save_idx] = cell_mass
@@ -130,6 +135,7 @@ def run_chunk(
         history_height[save_idx] = np.nan
         history_steps[save_idx] = 0
         history_time[save_idx] = time
+        history_theta[save_idx] = theta
         save_idx += 1        
         
 
@@ -145,11 +151,11 @@ def run_chunk(
         
         #1. Sample distribution
         if method == 2 or method == 3:
-            cell_mass_from_bias_interval(
+            logZb = cell_mass_from_bias_interval(
                 bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
             )
         else:
-            cell_mass_from_bias(
+            logZb = cell_mass_from_bias(
                 bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
             )
         center = sample_density(cell_mass, edges)
@@ -177,7 +183,8 @@ def run_chunk(
                 bias_at_center += bias_level
                 height_step = hill_height(height, r_delta_T, bias_at_center)
                 time_factor = np.exp(-r_delta_T * bias_level)
-                time += height * time_coeff * time_factor
+                delta_tau = height * time_coeff * time_factor
+                time += delta_tau
                 bias_level += height_step * hill_mean
 
             elif m_mode == 0:
@@ -193,6 +200,11 @@ def run_chunk(
                 bias_centered -= removed_mean    
                 if m_mode == 1:
                     bias_level += removed_mean
+            if m_mode == 1:
+                delta_theta = calc_theta_step(bias_centered, cell_mass, r_delta_T, delta_tau)
+                theta += delta_theta 
+            else:
+                theta = time
         else:
             height_step = 0.0
 
@@ -225,19 +237,22 @@ def run_chunk(
             history_height[save_idx] = height_step
             history_steps[save_idx] = current_step
             history_time[save_idx] = time
+            history_theta[save_idx] = theta
             save_idx += 1 
 
     return (
         bias_centered,
         bias_level,
         time,
+        theta,
         history_steps[:save_idx],
         history_center[:save_idx],
         history_height[:save_idx],
         history_bias_pb[:save_idx],
         history_mass_pb[:save_idx],
         history_mass_pw[:save_idx],
-        history_time[:save_idx]
+        history_time[:save_idx],
+        history_theta[:save_idx]
     )
 
 def run_simulation_to_disk(
@@ -253,7 +268,7 @@ def run_simulation_to_disk(
 
     bias_centered = np.zeros_like(x)
     bias_level = 0.0
-    time = 0.0
+    time, theta = 0.0, 0.0
     total_saves = ( 1 + total_steps // stride
     + (1 if total_steps % stride != 0 else 0))
 
@@ -262,6 +277,7 @@ def run_simulation_to_disk(
         d_centers = f.create_dataset("centers", (total_saves,), dtype="f8")
         d_heights = f.create_dataset("heights", (total_saves,), dtype="f8")
         d_time = f.create_dataset("time", (total_saves,), dtype="f8")
+        d_theta = f.create_dataset("theta", (total_saves,), dtype="f8")
 
         d_bias_pb = f.create_dataset(
             "bias_pb", (total_saves, n_grid), dtype="f8",
@@ -288,15 +304,17 @@ def run_simulation_to_disk(
                 bias_centered,
                 bias_level,
                 time,
+                theta,
                 h_steps,
                 h_centers,
                 h_heights,
                 h_bias_pb,
                 h_mass_pb,
                 h_mass_pw,
-                h_time
+                h_time,
+                h_theta
             ) = run_chunk(
-                method, m_mode, k_mode, bias_centered, bias_level, time,
+                method, m_mode, k_mode, bias_centered, bias_level, time, theta,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
                 height, total_steps, start_step, chunk_size_valid, stride, left, right,
                 n_images, peak_norm, integral_norm
@@ -308,6 +326,7 @@ def run_simulation_to_disk(
 
                 d_steps[write_idx:next_idx] = h_steps
                 d_time[write_idx:next_idx] = h_time
+                d_theta[write_idx:next_idx] = h_theta
                 d_centers[write_idx:next_idx] = h_centers
                 d_heights[write_idx:next_idx] = h_heights
                 d_bias_pb[write_idx:next_idx, :] = h_bias_pb              
@@ -322,7 +341,7 @@ def run_simulation_to_disk(
 def main() -> None:
     cfg = load_config()
     beta = 1.0 / cfg.kBT
-    r_delta_T = beta / (cfg.bias_factor - 1.0) if cfg.metad_mode == "wt" else -1
+    r_delta_T = beta / (cfg.bias_factor - 1.0) if cfg.metad_mode == "wt" else 0
     alpha = beta + r_delta_T if cfg.metad_mode == "wt" else beta
 
     k_mode = kernel_modes[cfg.kernel_mode]
