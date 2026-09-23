@@ -20,7 +20,6 @@ from eqmetad.fast_utils import (
     mcgovern_inverse_mean,
     gaussian_mcgovern_interval,
     grid_mean_on_interval,
-    calc_theta_step
 )
 from eqmetad.config_manager import load_config
 
@@ -151,10 +150,18 @@ def run_chunk(
         
         #1. Sample distribution
         if method == 2 or method == 3:
+            if m_mode == 1:
+                logZw = cell_mass_from_bias_interval(
+                    bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
+                )           
             logZb = cell_mass_from_bias_interval(
                 bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
             )
         else:
+            if m_mode == 1:
+                logZw = cell_mass_from_bias(
+                    bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
+                )            
             logZb = cell_mass_from_bias(
                 bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
             )
@@ -185,12 +192,16 @@ def run_chunk(
                 time_factor = np.exp(-r_delta_T * bias_level)
                 delta_tau = height * time_coeff * time_factor
                 time += delta_tau
+                R = np.exp(logZw - logZb)
+                delta_theta = R * delta_tau
+                theta += delta_theta 
                 bias_level += height_step * hill_mean
 
             elif m_mode == 0:
                 height_step = height
                 time_factor = current_step
                 time = height * time_coeff * time_factor
+                theta = time
 
             bias_centered += height_step * (hill - hill_mean)
 
@@ -200,19 +211,7 @@ def run_chunk(
                 bias_centered -= removed_mean    
                 if m_mode == 1:
                     bias_level += removed_mean
-            if m_mode == 1:
-                if method == 2 or method == 3:
-                    logZb = cell_mass_from_bias_interval(
-                        bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
-                    )
-                else:
-                    logZb = cell_mass_from_bias(
-                        bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
-                    )
-                delta_theta = calc_theta_step(bias_centered, cell_mass, r_delta_T, delta_tau)
-                theta += delta_theta 
-            else:
-                theta = time
+                
         else:
             height_step = 0.0
 
