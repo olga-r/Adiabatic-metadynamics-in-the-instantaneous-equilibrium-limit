@@ -16,7 +16,6 @@ from eqmetad.fast_utils import (
     gaussian_integral_on_interval,
     interp_periodic,
     interp,
-    calc_theta_step
 )
 from eqmetad.config_manager import load_config
 
@@ -105,8 +104,8 @@ def read_chunk(
                 logZw = cell_mass_from_bias_interval(
                      bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
                 )
-                logZb =  history_mass_pw[save_idx] = cell_mass
-                cell_mass_from_bias_interval(
+                history_mass_pw[save_idx] = cell_mass
+                logZb =  cell_mass_from_bias_interval(
                      bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
                 )
                 history_mass_pb[save_idx] = cell_mass 
@@ -150,8 +149,24 @@ def read_chunk(
             hill_mean = r_length * gaussian_integral_on_interval(center, sigma, k_mode, left, right)
         else:
             hill = gaussian_periodic(x, center, gauss_val, sigma, left, right, n_images, norm)
-            
-        #3. Deposit hill and update V
+
+        #3. Calculate Zw and Zb
+        if m_mode == 1 and F is not None:
+            if method == 2 or method == 3:
+                logZw = cell_mass_from_bias_interval(
+                    bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, alpha
+                )           
+                logZb = cell_mass_from_bias_interval(
+                    bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
+                )
+            else:
+                logZw = cell_mass_from_bias(
+                    bias_centered, F, log_rho, rho, cell_mass, beta, dx, alpha
+                )            
+                logZb = cell_mass_from_bias(
+                    bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
+                )
+        #4. Deposit hill and update V
         if m_mode == 1:
             center_clipped = max(left, min(center, right))
             if method == 0:
@@ -163,30 +178,21 @@ def read_chunk(
             time_factor = np.exp(-r_delta_T * bias_level)
             delta_tau = height * time_coeff * time_factor
             time += delta_tau
+            if F is not None:
+                r = np.exp(logZw - logZb)
+                delta_theta = r * delta_tau
+                theta += delta_theta 
+            else:
+                theta += time_coeff * height_step
             bias_level += height_step * hill_mean
 
         elif m_mode == 0:
             height_step = height
             time_factor = current_step
             time = height * time_coeff * time_factor
+            theta = time
         
-        bias_centered += height_step * (hill - hill_mean)
-
-        if m_mode == 1 and F is not None:
-            if method == 2 or method == 3:
-                logZb = cell_mass_from_bias_interval(
-                        bias_centered, F, s_clamped, x, log_rho, rho, cell_mass, beta, dx, beta
-                )
-            else:
-                logZb = cell_mass_from_bias(
-                        bias_centered, F, log_rho, rho, cell_mass, beta, dx, beta
-                )
-            delta_theta = calc_theta_step(bias_centered, cell_mass, r_delta_T, delta_tau)
-            theta += delta_theta 
-        elif m_mode == 1:
-            theta += height_step
-        else:
-            theta = time      
+        bias_centered += height_step * (hill - hill_mean)   
         
         # 4. save to disk
         if should_save:
