@@ -192,8 +192,8 @@ def run_chunk(
                 time_factor = np.exp(-r_delta_T * bias_level)
                 delta_tau = height * time_coeff * time_factor
                 time += delta_tau
-                R = np.exp(logZw - logZb)
-                delta_theta = R * delta_tau
+                r = np.exp(logZw - logZb)
+                delta_theta = r * delta_tau
                 theta += delta_theta 
                 bias_level += height_step * hill_mean
 
