@@ -189,22 +189,22 @@ def run_chunk(
                 else:
                     bias_at_center = interp(center_clipped, x[0], dx, bias_centered)
                 bias_at_center += bias_level
-                height_step = hill_height(height, r_delta_T, bias_at_center)
+                height_coeff = hill_height(height, r_delta_T, bias_at_center)
                 time_factor = np.exp(-r_delta_T * bias_level)
                 delta_tau = height * time_coeff * time_factor
                 time += delta_tau
                 r = np.exp(logZw - logZb)
                 delta_theta = r * delta_tau
                 theta += delta_theta 
-                bias_level += height_step * hill_mean
+                bias_level += height_coeff * hill_mean
 
             elif m_mode == 0:
-                height_step = height
+                height_coeff = height
                 time_factor = current_step
                 time = height * time_coeff * time_factor
                 theta = time
 
-            bias_centered += height_step * (hill - hill_mean)
+            bias_centered += height_coeff * (hill - hill_mean)
 
             if method == 3:
                 bias_centered_interval = bias_centered[(x > left) & (x < right)]
