@@ -107,8 +107,6 @@ def main() -> None:
             json.dump(all_data, ff, indent=4)
         np.savetxt('mass_in_peaks.txt', mass_in_peaks)
         np.savetxt('KL_distance.txt', kl_distance)
-        np.savetxt('heights_pb.txt', heights)
-        np.savetxt('heights_pw.txt', heights*ab)
         np.save("pw", f['cell_mass_pw'][:]/dx)
         np.save("pb", f['cell_mass_pb'][:]/dx)
         plot_masses(mass_in_peaks, time)
@@ -120,7 +118,10 @@ def main() -> None:
         np.savetxt( 'time.txt', np.column_stack((time, theta, theta*alpha)),
                    header="time     theta_scaled     theta_scaled_estimate"
                   )
- 
+    
+    np.savetxt('heights.txt', np.column_stack((heights, heights*ab)),  
+               header = 'heights (pb)    scaled_heights (pw)'
+              )
     np.savetxt('centers.txt', hills_centers)   
     np.save("bias_pw", bias_pb*ab)
     np.save("bias_pb", bias_pb)
