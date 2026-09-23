@@ -68,6 +68,7 @@ def run_chunk(
         time_coeff = peak_norm / integral_norm
     elif method == 3:  # McGovern
         time_coeff = 1.0
+        #McGovern normalisation is included in the kernel. It is not absorbed into internal time.
     else:  # bounds / interval, unit_integral
         time_coeff = 1.0 / (np.sqrt(2.0 * np.pi) * sigma)
     
