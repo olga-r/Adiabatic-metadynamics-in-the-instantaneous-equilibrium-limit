@@ -133,7 +133,7 @@ def run_chunk(
         history_center[save_idx] = np.nan
         history_height[save_idx] = np.nan
         history_steps[save_idx] = 0
-        history_time[save_idx] = time
+        history_tau[save_idx] = tau
         history_theta[save_idx] = theta
         save_idx += 1        
         
