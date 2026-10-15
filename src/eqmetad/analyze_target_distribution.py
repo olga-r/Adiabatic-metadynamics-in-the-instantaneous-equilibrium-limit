@@ -59,10 +59,10 @@ def main() -> None:
     full_path = (current_dir / cfg.base_dir / cfg.filename).resolve()
 
     f = h5py.File(full_path, 'r')
-    ( bias_pb, hills_centers, time, theta,
+    ( bias_pb, hills_centers, tau, theta,
         heights, steps, grid_edges, grid_centers
     )  = (  f['bias_pb'][:],   f['centers'][:],
-           f['time'][:],  f['theta'][:], f['heights'][:], f['steps'][:],
+           f['tau'][:],  f['theta'][:], f['heights'][:], f['steps'][:],
            f['grid_edges'][:], f['grid_x'][:])
     dx = grid_edges[1]-grid_edges[0]
     
@@ -111,12 +111,12 @@ def main() -> None:
         np.save("pb", f['cell_mass_pb'][:]/dx)
         plot_masses(mass_in_peaks, time)
         plot_kl_distance(kl_distance, time)
-        np.savetxt( 'time.txt', np.column_stack((time, theta, theta*alpha)),
-                   header="time     theta     scaled_theta"
+        np.savetxt( 'time.txt', np.column_stack((tau, theta, theta*alpha)),
+                   header="tau    theta     s"
                   )
     else:
-        np.savetxt( 'time.txt', np.column_stack((time, theta, theta*alpha)),
-                   header="time     theta_scaled     theta_scaled_estimate"
+        np.savetxt( 'time.txt', np.column_stack((tau, theta, theta*alpha)),
+                   header="tau     theta_estimate     s_estimate"
                   )
     
     np.savetxt('heights.txt', np.column_stack((heights, heights*ab)),  
