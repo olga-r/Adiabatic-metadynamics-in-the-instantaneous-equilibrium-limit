@@ -34,7 +34,7 @@ def run_chunk(
     k_mode,
     bias_init,
     bias_level_init,
-    time_init,
+    tau_init,
     theta_init,
     x,
     edges,
@@ -58,7 +58,7 @@ def run_chunk(
 ):
     bias_centered = bias_init.copy()
     bias_level = bias_level_init
-    time = time_init
+    tau = tau_init
     theta = theta_init
     
     norm = 1/peak_norm if k_mode == 0 else 1/integral_norm
@@ -78,7 +78,7 @@ def run_chunk(
     history_center = np.empty(max_saves, dtype=np.float64)
     history_height = np.empty(max_saves, dtype=np.float64)
     history_steps = np.empty(max_saves, dtype=np.int64)
-    history_time = np.empty(max_saves, dtype=np.float64)
+    history_tau = np.empty(max_saves, dtype=np.float64)
     history_theta = np.empty(max_saves, dtype=np.float64)
 
     log_rho = np.empty_like(x)
@@ -191,7 +191,7 @@ def run_chunk(
                 height_coeff = hill_height(height, r_delta_T, bias_at_center)
                 time_factor = np.exp(-r_delta_T * bias_level)
                 delta_tau = height * time_coeff * time_factor
-                time += delta_tau
+                tau += delta_tau
                 r = np.exp(logZw - logZb)
                 delta_theta = r * delta_tau
                 theta += delta_theta 
@@ -200,8 +200,8 @@ def run_chunk(
             elif m_mode == 0:
                 height_coeff = height
                 time_factor = current_step
-                time = height * time_coeff * time_factor
-                theta = time
+                tau = height * time_coeff * time_factor
+                theta = t
 
             bias_centered += height_coeff * (hill - hill_mean)
 
@@ -243,7 +243,7 @@ def run_chunk(
             history_center[save_idx] = center
             history_height[save_idx] = height_step
             history_steps[save_idx] = current_step
-            history_time[save_idx] = time
+            history_tau[save_idx] = tau
             history_theta[save_idx] = theta
             save_idx += 1 
 
@@ -258,7 +258,7 @@ def run_chunk(
         history_bias_pb[:save_idx],
         history_mass_pb[:save_idx],
         history_mass_pw[:save_idx],
-        history_time[:save_idx],
+        history_tau[:save_idx],
         history_theta[:save_idx]
     )
 
@@ -275,7 +275,7 @@ def run_simulation_to_disk(
 
     bias_centered = np.zeros_like(x)
     bias_level = 0.0
-    time, theta = 0.0, 0.0
+    tau, theta = 0.0, 0.0
     total_saves = ( 1 + total_steps // stride
     + (1 if total_steps % stride != 0 else 0))
 
@@ -283,7 +283,7 @@ def run_simulation_to_disk(
         d_steps = f.create_dataset("steps", (total_saves,), dtype="i8")
         d_centers = f.create_dataset("centers", (total_saves,), dtype="f8")
         d_heights = f.create_dataset("heights", (total_saves,), dtype="f8")
-        d_time = f.create_dataset("time", (total_saves,), dtype="f8")
+        d_tau = f.create_dataset("tau", (total_saves,), dtype="f8")
         d_theta = f.create_dataset("theta", (total_saves,), dtype="f8")
 
         d_bias_pb = f.create_dataset(
@@ -310,7 +310,7 @@ def run_simulation_to_disk(
             (
                 bias_centered,
                 bias_level,
-                time,
+                tau,
                 theta,
                 h_steps,
                 h_centers,
@@ -318,10 +318,10 @@ def run_simulation_to_disk(
                 h_bias_pb,
                 h_mass_pb,
                 h_mass_pw,
-                h_time,
+                h_tau,
                 h_theta
             ) = run_chunk(
-                method, m_mode, k_mode, bias_centered, bias_level, time, theta,
+                method, m_mode, k_mode, bias_centered, bias_level, tau, theta,
                 x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
                 height, total_steps, start_step, chunk_size_valid, stride, left, right,
                 n_images, peak_norm, integral_norm
@@ -332,7 +332,7 @@ def run_simulation_to_disk(
                 next_idx = write_idx + n_new_records
 
                 d_steps[write_idx:next_idx] = h_steps
-                d_time[write_idx:next_idx] = h_time
+                d_tau[write_idx:next_idx] = h_tau
                 d_theta[write_idx:next_idx] = h_theta
                 d_centers[write_idx:next_idx] = h_centers
                 d_heights[write_idx:next_idx] = h_heights
