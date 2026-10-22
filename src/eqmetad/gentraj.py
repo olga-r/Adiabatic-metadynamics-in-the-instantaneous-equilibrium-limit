@@ -24,7 +24,7 @@ from eqmetad.fast_utils import (
 from eqmetad.config_manager import load_config
 
 kernel_modes = {"unit_peak": 0, "unit_integral": 1}
-metad_modes = {"normal": 0, "wt": 1}
+metad_modes = {"standard": 0, "wt": 1}
 
 
 @njit
