@@ -377,7 +377,7 @@ def main() -> None:
     if cfg.potential == "constant":
         F = constant(x,cfg.min, cfg.max)
     elif cfg.potential == "custom":
-        custom_potential = import_custom_potential()
+        custom_potential = import_custom_potential(func_name = cfg.func_name)
         F = custom_potential(x, cfg.min, cfg.max)
     else:
         raise NotImplementedError("The trajectory generator cannot work without a potential.")
