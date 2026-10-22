@@ -250,7 +250,7 @@ def run_chunk(
     return (
         bias_centered,
         bias_level,
-        time,
+        tau,
         theta,
         history_steps[:save_idx],
         history_center[:save_idx],
