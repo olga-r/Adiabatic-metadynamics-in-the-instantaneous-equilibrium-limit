@@ -63,7 +63,7 @@ def periodic_kernel_parameters(sigma, left, right, tol=1e-14):
     ))
     return n_images, peak_norm, integral_norm
 
-def import_custom_potential(module_name="custom_potential", func_name="custom"):
+def import_custom_potential(func_name="custom", module_name="custom_potential"):
     cwd = os.getcwd()
     file_path = os.path.join(cwd, f"{module_name}.py")
 
