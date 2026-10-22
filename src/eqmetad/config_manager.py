@@ -18,7 +18,8 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "kBT": 1.0,
     "height": 1,
     "bias_factor": 10,
-    "potential": "constant",# "none"
+    "potential": "constant",# "custom", "none"
+    "func_name": "custom", 
     "min": 0,
     "max": 1,
     "out_min": 0,
