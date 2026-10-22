@@ -123,9 +123,9 @@ def main() -> None:
                header = 'heights (pb)    scaled_heights (pw)'
               )
     np.savetxt('centers.txt', hills_centers)   
-    np.save("bias_pw", bias_pb*ab)
-    np.save("bias_pb", bias_pb)
-
+    np.save("bias_V_pw", bias_pb*ab)
+    np.save("bias_V_pb", bias_pb)
+    np.save("bias_U", bias_pb*alpha)
 
 
 
