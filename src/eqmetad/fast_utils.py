@@ -176,7 +176,7 @@ def cell_mass_from_bias(V, F, log_rho, rho, cell_mass, beta, dx, alpha):
         total_mass += c_mass
 
     inv_total = 1.0 / total_mass
-    logZ = max_log_rho + log(total_mass)
+    logZ = max_log_rho + np.log(total_mass)
     for i in range(n):
         cell_mass[i] *= inv_total
     return logZ
