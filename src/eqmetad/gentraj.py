@@ -201,7 +201,7 @@ def run_chunk(
                 height_coeff = height
                 time_factor = current_step
                 tau = height * time_coeff * time_factor
-                theta = t
+                theta = tau
 
             bias_centered += height_coeff * (hill - hill_mean)
 
