@@ -109,8 +109,8 @@ def main() -> None:
         np.savetxt('KL_distance.txt', kl_distance)
         np.save("pw", f['cell_mass_pw'][:]/dx)
         np.save("pb", f['cell_mass_pb'][:]/dx)
-        plot_masses(mass_in_peaks, time)
-        plot_kl_distance(kl_distance, time)
+        plot_masses(mass_in_peaks, theta*alpha)
+        plot_kl_distance(kl_distance, theta*alpha)
         np.savetxt( 'time.txt', np.column_stack((tau, theta, theta*alpha)),
                    header="tau    theta     s"
                   )
