@@ -188,22 +188,22 @@ def run_chunk(
                 else:
                     bias_at_center = interp(center_clipped, x[0], dx, bias_centered)
                 bias_at_center += bias_level
-                height_coeff = hill_height(height, r_delta_T, bias_at_center)
+                height_factor = hill_height(height, r_delta_T, bias_at_center)
                 time_factor = np.exp(-r_delta_T * bias_level)
                 delta_tau = height * time_coeff * time_factor
                 tau += delta_tau
                 r = np.exp(logZw - logZb)
                 delta_theta = r * delta_tau
                 theta += delta_theta 
-                bias_level += height_coeff * hill_mean
+                bias_level += height_factor * hill_mean
 
             elif m_mode == 0:
-                height_coeff = height
+                height_factor = height
                 time_factor = current_step
                 tau = height * time_coeff * time_factor
                 theta = tau
 
-            bias_centered += height_coeff * (hill - hill_mean)
+            bias_centered += height_factor * (hill - hill_mean)
 
             if method == 3:
                 bias_centered_interval = bias_centered[(x > left) & (x < right)]
@@ -213,7 +213,7 @@ def run_chunk(
                     bias_level += removed_mean
                 
         else:
-            height_step = 0.0
+            height_factor = 0.0
 
         # 4. save to disk
         if should_save:
@@ -241,7 +241,7 @@ def run_chunk(
                 history_bias_pb[save_idx] = bias_centered
             
             history_center[save_idx] = center
-            history_height[save_idx] = height_step
+            history_height[save_idx] = height_factor
             history_steps[save_idx] = current_step
             history_tau[save_idx] = tau
             history_theta[save_idx] = theta
