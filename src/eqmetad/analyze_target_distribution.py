@@ -51,6 +51,7 @@ def main() -> None:
     r_delta_T = beta / (cfg.bias_factor - 1.0) if cfg.metad_mode == "wt" else 0
     alpha = beta + r_delta_T if cfg.metad_mode == "wt" else beta
     ab = alpha/beta
+    md_time = np.arange(0, cfg.total_steps+1, cfg.stride).reshape(-1, 1)
     
     plt_stride = max(1, round(cfg.plot_stride / cfg.stride)) if cfg.plot_stride>=cfg.stride else cfg.plot_stride
     print(f"Plotting every {plt_stride } saved frames.")
@@ -111,12 +112,12 @@ def main() -> None:
         np.save("pb", f['cell_mass_pb'][:]/dx)
         plot_masses(mass_in_peaks, theta*alpha)
         plot_kl_distance(kl_distance, theta*alpha)
-        np.savetxt( 'time.txt', np.column_stack((tau, theta, theta*alpha)),
-                   header="tau    theta     s"
+        np.savetxt( 'time.txt', np.column_stack((md_time, tau, theta, theta*alpha)),
+                   header="md_time    tau       theta         s"
                   )
     else:
-        np.savetxt( 'time.txt', np.column_stack((tau, theta, theta*alpha)),
-                   header="tau     theta_estimate     s_estimate"
+        np.savetxt( 'time.txt', np.column_stack((md_time, tau, theta, theta*alpha)),
+                   header="md_time      tau       theta_estimate        s_estimate"
                   )
     
     np.savetxt('heights.txt', np.column_stack((heights, heights*ab)),  
