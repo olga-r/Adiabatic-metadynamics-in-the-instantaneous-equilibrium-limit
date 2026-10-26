@@ -38,13 +38,16 @@ def detect_peaks(dx, sigma, peak_threshold, filter_width, p, periodic=False):
 
 
 
-def analyze_peaks(peaks_indices, p, grid_centers, masses, left, right, periodic=False):
+def analyze_peaks(peaks_indices, p, grid_centers, masses, left, right, dx,  periodic=False):
+
     L = right - left
-    max_peak_std = 0.01 * L
     N = len(p)
 
     if not peaks_indices:
         return 0.0, {}
+
+    sigma_atomic_phys = 0.01*L
+    sigma_atomic = max(sigma_atomic_phys, 1.5 * dx)
 
     if periodic:
         boundaries = []
@@ -68,7 +71,7 @@ def analyze_peaks(peaks_indices, p, grid_centers, masses, left, right, periodic=
         segments = list(zip(boundaries[:-1], boundaries[1:]))
 
     peaks_data = {}
-    peaks_mass = 0
+    peaks_mass = 0.0
 
     for j, (a, b) in enumerate(segments, start=1):
         if periodic and a >= b:
@@ -81,49 +84,39 @@ def analyze_peaks(peaks_indices, p, grid_centers, masses, left, right, periodic=
         local_mass = masses[indices]
         m = float(np.sum(local_mass))
 
+        if m <= 0:
+            continue
+
         local_x = grid_centers[indices]
 
         if periodic:
             theta = 2 * np.pi * (local_x - left) / L
-
             S = np.dot(np.sin(theta), local_mass) / m
             C = np.dot(np.cos(theta), local_mass) / m
 
             center_theta = np.arctan2(S, C)
             center = float(left + (center_theta % (2 * np.pi)) * L / (2 * np.pi))
 
-            dx = local_x - center
-            dx = dx - L * np.round(dx / L)
-            variance = float(np.dot(dx ** 2, local_mass) / m)
-
-            boundary_rms = np.nan
-
+            dx_dist = local_x - center
+            dx_dist = dx_dist - L * np.round(dx_dist / L)
+            variance = float(np.dot(dx_dist ** 2, local_mass) / m)
         else:
             center = float(np.dot(local_x, local_mass) / m)
             variance = float(np.dot((local_x - center) ** 2, local_mass) / m)
 
-            distance_to_left = center - left
-            distance_to_right = right - center
-
-            if distance_to_left < max_peak_std:
-                boundary_rms = np.sqrt(float(np.dot((local_x - left) ** 2, local_mass) / m))
-            elif distance_to_right < max_peak_std:
-                boundary_rms = np.sqrt(float(np.dot((right - local_x) ** 2, local_mass) / m))
-            else:
-                boundary_rms = np.nan
-
         std = np.sqrt(max(variance, 0.0))
-        if std < max_peak_std * 0.5:
-            peaks_mass += m
 
-        if std < max_peak_std:
-            peaks_data[int(j)] = {
+        weight = np.exp(- (std ** 2) / (2 * (sigma_atomic ** 2)))
+
+        peaks_mass += m * weight
+
+
+        peaks_data[int(j)] = {
                 "mass": m,
+                "atomic_weight": weight,
                 "center": center,
                 "variance": variance,
-                "std": std,
-                "boundary_rms": boundary_rms
+                "std": std
             }
 
     return peaks_mass, peaks_data
-
