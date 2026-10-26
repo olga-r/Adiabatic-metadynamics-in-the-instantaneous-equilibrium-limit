@@ -99,7 +99,7 @@ def main() -> None:
 
             step_mass, step_data = analyze_peaks(
                 peaks_indices=peak_indices, p=p, grid_centers=grid_centers_interval, 
-                masses=masses, left = cfg.min, right = cfg.max, periodic=periodic
+                masses=masses, left = cfg.min, right = cfg.max,dx, periodic=periodic
             )
             mass_in_peaks[step_idx] = step_mass
             all_data[int(step)] = step_data
