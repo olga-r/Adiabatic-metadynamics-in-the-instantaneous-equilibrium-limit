@@ -51,7 +51,10 @@ def main() -> None:
     r_delta_T = beta / (cfg.bias_factor - 1.0) if cfg.metad_mode == "wt" else 0
     alpha = beta + r_delta_T if cfg.metad_mode == "wt" else beta
     ab = alpha/beta
-    md_time = np.arange(0, cfg.total_steps+1, cfg.stride).reshape(-1, 1)
+    md_time = np.arange(0, cfg.total_steps+1, cfg.stride)
+    if md_time[-1] != cfg.total_steps:
+        md_time = np.append(md_time, cfg.total_steps)
+    md_time =md_time.reshape(-1, 1)
     
     plt_stride = max(1, round(cfg.plot_stride / cfg.stride)) if cfg.plot_stride>=cfg.stride else cfg.plot_stride
     print(f"Plotting every {plt_stride } saved frames.")
