@@ -130,6 +130,7 @@ def main() -> None:
     np.save("bias_V_pw", bias_pb*ab)
     np.save("bias_V_pb", bias_pb)
     np.save("bias_U", bias_pb*alpha)
+    np.savetxt("grid_centers.txt", grid_centers)
 
 
 
