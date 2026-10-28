@@ -27,7 +27,7 @@ pip install .
      - `"out_min"` and `"out_max"` should be the same as the `"min"` and `"max"` in all cases except when the `"interval"` method is chosen. In this context, they are used to indicate the external boundaries of the grid.
      - `"n_grid"`: the number of bins in the interval `["min", "max"]`
      - `"height"` and `"sigma"` are the parameters of the Gaussian function
-     - `"bias_factor"` is needed only if well-tempered metadynamics is chosen. Just leave it as is if you are doing standard metadynamics
+     - `"bias_factor"` is needed only if well-tempered metadynamics is chosen.
      - `"total_steps"` is the length of the simulation
      - `"chunk_size"` defines the physical size of each I/O operation.
      - `"stride"` denotes how often the results are saved.
