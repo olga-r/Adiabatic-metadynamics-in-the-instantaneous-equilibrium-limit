@@ -2,10 +2,6 @@
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["eqmetad*"]
-
 [project]
 name = "eqmetad"
 version = "0.1.0"
@@ -24,3 +20,6 @@ metad_readhills = "eqmetad.readhills:main"
 metad_target_distr = "eqmetad.analyze_target_distribution:main"
 metad_config = "eqmetad.config_manager:create_default_settings"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["eqmetad*"]
