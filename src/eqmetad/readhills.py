@@ -39,7 +39,6 @@ def read_chunk(
     alpha,
     beta,
     sigma,
-    bias_factor,
     r_delta_T,
     height,
     total_steps,
@@ -247,7 +246,7 @@ def read_chunk(
 def save_data_to_disk(
     method, total_steps, chunk_size, stride, seed, n_grid,
     filename, m_mode, k_mode, x, edges, dx, F, alpha, beta,
-    sigma, bias_factor, r_delta_T, height, centers, left, right, n_images, peak_norm, integral_norm
+    sigma,  r_delta_T, height, centers, left, right, n_images, peak_norm, integral_norm
     ):
 
     @njit
@@ -306,7 +305,7 @@ def save_data_to_disk(
                 h_theta
             ) = read_chunk(
                 method, m_mode, k_mode, bias_centered, bias_level, tau, theta, 
-                x, edges, dx, F, alpha, beta, sigma, bias_factor, r_delta_T,
+                x, edges, dx, F, alpha, beta, sigma, r_delta_T,
                 height, total_steps, start_step, chunk_size_valid, stride, centers,  left, right,
                 n_images, peak_norm, integral_norm
             )
@@ -389,7 +388,6 @@ def main() -> None:
         alpha=alpha,
         beta=beta,
         sigma=cfg.sigma,
-        bias_factor=cfg.bias_factor,
         r_delta_T=r_delta_T,
         height=cfg.height,
         centers=centers,
