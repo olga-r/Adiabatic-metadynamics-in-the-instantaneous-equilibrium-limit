@@ -1,0 +1,29 @@
+# vim:ft=plumed
+# PLUMED for Replica 2: Y2 = -x+13
+UNITS NATURAL
+
+# setup the potential
+p: DISTANCE ATOMS=1,2 COMPONENTS
+s: CUSTOM ARG=p.x,p.y,p.z FUNC=(3+cos(x)+cos(y)+cos(z))/6 PERIODIC=NO
+ene: MATHEVAL ARG=s VAR=s FUNC=250*((s-0.5)^2-0.13)^2  PERIODIC=NO
+potential: BIASVALUE ARG=ene
+
+metad: METAD ...
+  ARG=s
+  TEMP=1
+  PACE=1000
+  HEIGHT=0.0001
+  RESTART=AUTO
+  SIGMA=0.07
+  GRID_MIN=0
+  GRID_MAX=1
+  GRID_BIN=250
+  FILE=HILLS
+  GRID_WFILE=BIAS
+  #GRID_RFILE=BIAS
+  GRID_WSTRIDE=100000000
+  STORE_GRIDS
+...
+
+PRINT STRIDE=1000 FILE=COLVAR ARG=p.x,p.y,p.z,s,ene,metad.*
+

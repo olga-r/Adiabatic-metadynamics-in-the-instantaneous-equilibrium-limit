@@ -1,0 +1,23 @@
+{
+    "method": "bounds",
+    "metad_mode": "standard",
+    "n_grid": 250,
+    "sigma": 0.07,
+    "kBT": 1.0,
+    "height": 0.0001,
+    "potential": "custom",
+    "func_name": "custom",
+    "min": 0.0,
+    "max": 1.0,
+    "kernel_mode": "unit_peak",
+    "total_steps": 0,
+    "chunk_size": 1000000,
+    "stride": 1000,
+    "base_dir": "./",
+    "filename": "simulation_results.h5",
+    "hill_file": "./HILLS",
+    "plot_stride": 10000,
+    "filter_width": 1.5,
+    "peak_threshold": 1.0,
+    "seed": 9573446
+}
