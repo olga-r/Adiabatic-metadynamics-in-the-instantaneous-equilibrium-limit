@@ -23,21 +23,21 @@ pip install .
      - `"metad_mode"`: `"wt"` (well-tempered) or `"standard"` (height of the hills is constant)
      - `"potential"`: `"constant"`, `"custom"` or `"none"` (`"none"` is the special case that works only with `metad_readhills`). 
      - `"kernel_mode"`: `"unit_peak"` or `"unit_integral"`. This option describes hill normalization. To align with PLUMED, it is necessary to select `"unit_peak"`.
-     - `"height": the value of the height of the Gaussian function
+     - `"height"`: the value of the height of the Gaussian function
      - `"sigma"`: the value of the $\sigma$ of the Gaussian function
      - `"bias_factor"`: the value of the bias factor, $\gamma$, in well-tempered metadynamics
-     -  "kBT": the value of the temperature factor kT
+     -  `"kBT"`: the value of the temperature factor kT
      - `"min"` and `"max"` are the boundaries of the interval for which the FES should be restored
      - `"out_min"` and `"out_max"` are the external boundaries of the grid for the "interval" and "mcgovern_interval" methods.
      - `"n_grid"`: the number of bins in the interval `["min", "max"]`
-     - "periodic_tol": 1e-14,
-     - `"total_steps"` is the length of the simulation
-     - `"chunk_size"` defines the physical size of each I/O operation.
-     - `"stride"` denotes how often the results are saved.
-     - "plot_stride": 100_000_000,
-     - "base_dir":  "./",
-     - "filename": "simulation_results.h5",
-     - "hill_file": "./HILLS",
+     - `"periodic_tol"`: the maximum allowable error when truncating an infinite sum for a periodic kernel. This error determines the point at which the "tail" of a Gaussian distribution is small enough to be neglected 
+     - `"total_steps": the total number of steps (length) of the simulation
+     - `"chunk_size"`: the physical size of each I/O operation
+     - `"stride"`: the frequency with which the results are saved by the metad_gentraj and metad_readhills
+     - "plot_stride": the frequency with which the $p_w$ distribution is plotted by the metad_target_distr 
+     - "base_dir":  working directory
+     - "filename": filename to output metad_gentraj or metad_readhills results
+     - "hill_file": path to the PLUMED HILL file, only necessary for metad_readhills program
      - "filter_width": 1.5,
      - "peak_threshold": 1.0,
      - "seed": 8456835
