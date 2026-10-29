@@ -24,7 +24,7 @@ pip install .
      - `"potential"`: `"constant"`, `"custom"` or `"none"` (`"none"` is the special case that works only with `metad_readhills`). 
      - `"kernel_mode"`: `"unit_peak"` or `"unit_integral"`. This option describes hill normalization. To align with PLUMED, it is necessary to select `"unit_peak"`.
      - `"min"` and `"max"` are the boundaries of the interval for which the FES should be restored
-     - `"out_min"` and `"out_max"` should be the same as the `"min"` and `"max"` in all cases except when the `"interval"` method is chosen. In this context, they are used to indicate the external boundaries of the grid.
+     - `"out_min"` and `"out_max"` are the external boundaries of the grid for the "interval" and "mcgovern_interval" methods.
      - `"n_grid"`: the number of bins in the interval `["min", "max"]`
      - `"height"` and `"sigma"` are the parameters of the Gaussian function
      - `"bias_factor"` is needed only if well-tempered metadynamics is chosen.
