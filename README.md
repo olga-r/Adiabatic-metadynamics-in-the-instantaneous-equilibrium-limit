@@ -17,7 +17,7 @@ pip install .
 # Usage
 
 1. Change to your working directory and type `metad_config` in the console. Two files will be created: `custom_potential.py` and `job_config.json`.
-   - **a)** Only $F(x) = \text{constant}$ is implemented by default; however, it is possible to set Potential to `"Custom"` in `job_config.json` and modify `custom_potential.py` so that the custom function returns your custom $F(x)$.
+   - **a)** Only $F(x) = \text{constant}$ is implemented by default; however, it is possible to set Potential to `"Custom"` in `job_config.json` and modify `custom_potential.py` so that the custom function returns your custom $F(x)$ (see examples). The name of the function that generates the potential must be specified in the job_config.json file under the "func_name" parameter (e.g., "func_name": "custom").
    - **b)** In `job_config.json` select:
      - `"method"`: `"bounds"` (finite interval), `"interval"` (method interval [1]), `"periodic"`, `"mcgovern_interval"` ([2]); `mcgovern_interval` works only with `metad_gentraj`
      - `"metad_mode"`: `"wt"` (well-tempered) or `"normal"` (height of the hills is constant)
