@@ -34,10 +34,10 @@ pip install .
      - `"total_steps"`: the total number of steps (length) of the simulation
      - `"chunk_size"`: the physical size of each I/O operation
      - `"stride"`: the frequency with which the results are saved by the `metad_gentraj` and `metad_readhills`
-     - `"plot_stride"`: the frequency with which the $p_w$ distribution is plotted by the `metad_target_distr` 
+     - `"plot_stride"`: the frequency with which the $p_w$ distribution is plotted by the `metad_target_distr`. To disable plotting of $p_w$, set `plot_stride` to less than or equal to 0.
      - `"base_dir"`:  working directory
-     - `"filename"`: filename to output metad_gentraj or metad_readhills results
-     - `"hill_file"`: path to the PLUMED HILL file, only necessary for metad_readhills program
+     - `"filename"`: filename to output the `metad_gentraj` or `metad_readhills` results
+     - `"hill_file"`: the path to the PLUMED hill file. This is only necessary for the `metad_readhills` program.
      - `"filter_width"`: 1.5,
      - `"peak_threshold"`: 1.0,
      - `"seed"`: 8456835
