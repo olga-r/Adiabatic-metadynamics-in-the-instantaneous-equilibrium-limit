@@ -82,7 +82,7 @@ def main() -> None:
         for step_idx, step in enumerate(steps):
             masses = np.squeeze(cell_mass_pw[step_idx])
             p = masses / dx
-            if step_idx%plt_stride == 0:
+            if plt_stride > 0 and step_idx%plt_stride == 0:
                 plot_p(p, step,grid_centers)
             if cfg.method in ("interval", "mcgovern_interval"):
                 p = p[(grid_centers > cfg.min) & (grid_centers < cfg.max)]
