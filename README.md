@@ -52,12 +52,12 @@ pip install .
    - the "mass_in_peaks.txt" file, which contains the mass that falls into narrow peaks
    - the "centers.txt" file, which contains the coordinates of the Gaussian centers
    - the "grid_centers.txt" file, which contains the positions of the grid centers
-   - the "bias_V_pb.npy" file, which contains the bias potential that was saved with the `"stride"` parameter.
-   - the "bias_V_w.npy" file, which contains the bias potential scaled by $\alpha/\beta$, where $beta=\frac{1}{kT}$, $\alpha = \beta + \frac{1}{k\Delta T}$, $\gamma = 1+\frac{\Delta T}{T}$, and $\gamma$ is a bias factor. For standard metadynamics, $\alpha=\beta$
-    np.save("bias_V_pb", bias_pb)
-    np.save("bias_U", bias_pb*alpha)
-   - The file `pw.npy` containing distributions in the total potential (biased + original).
-   - 
+   - the "bias_V_pb.npy" file, which contains the bias potential that was saved with the `"stride"` parameter
+   - the "bias_V_w.npy" file, which contains the bias potential scaled by $\alpha/\beta$, where $\beta=\frac{1}{kT}$, $\alpha = \beta + \frac{1}{k\Delta T}$, $\gamma = 1+\frac{\Delta T}{T}$, and $\gamma$ is a bias factor. For standard metadynamics, $\alpha=\beta$
+   -  the "bias_U.npy" file, which contains the bias potential scaled by $\alpha$ 
+   -  the "pb.npy"  file, which contains the distributions in the $F(x) + V_{bias}(x)$ potential
+   - the "pw.npy"  file, which contains the distributions in the $F(x) + \frac{\alpha}{\beta}V_{bias}(x)$ potential
+   - the "heights.txt" file, which contains the heights of the deposited hills and the heights scaled by $\alpha/\beta$
 
 # References
 1. Badanin A., Rogacheva O. On the Convergence of Metadynamics with Gaussian Hills, arXiv:2609.01934
