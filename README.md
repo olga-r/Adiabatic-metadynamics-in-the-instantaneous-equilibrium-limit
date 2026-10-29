@@ -53,11 +53,11 @@ pip install .
    - the "centers.txt" file, which contains the coordinates of the Gaussian centers
    - the "grid_centers.txt" file, which contains the positions of the grid centers
    - the "bias_V_pb.npy" file, which contains the bias potential that was saved with the `"stride"` parameter
-   - the "bias_V_w.npy" file, which contains the bias potential scaled by $\alpha/\beta$, where $\beta=\frac{1}{kT}$, $\alpha = \beta + \frac{1}{k\Delta T}$, $\gamma = 1+\frac{\Delta T}{T}$, and $\gamma$ is a bias factor. For standard metadynamics, $\alpha=\beta$
+   - the "bias_V_w.npy" file, which contains the bias potential scaled by $\frac{\alpha}{\beta}$, where $\beta=\frac{1}{kT}$, $\alpha = \beta + \frac{1}{k\Delta T}$, $\gamma = 1+\frac{\Delta T}{T}$, and $\gamma$ is a bias factor. For standard metadynamics, $\alpha=\beta$
    -  the "bias_U.npy" file, which contains the bias potential scaled by $\alpha$ 
    -  the "pb.npy"  file, which contains the distributions in the $F(x) + V_{bias}(x)$ potential
    - the "pw.npy"  file, which contains the distributions in the $F(x) + \frac{\alpha}{\beta}V_{bias}(x)$ potential
-   - the "heights.txt" file, which contains the heights of the deposited hills and the heights scaled by $\alpha/\beta$
+   - the "heights.txt" file, which contains the heights of the deposited hills and the heights scaled by $\frac{\alpha}{\beta}$.
 
 # References
 1. Badanin A., Rogacheva O. On the Convergence of Metadynamics with Gaussian Hills, arXiv:2609.01934
