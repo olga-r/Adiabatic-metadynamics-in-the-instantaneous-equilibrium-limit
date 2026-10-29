@@ -25,7 +25,6 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "plot_stride": 10000000,
     "base_dir":  "./",
     "filename": "simulation_results.h5",
-    "hill_file": "./HILLS",
     "filter_width": 1.5,
     "peak_threshold": 1.0,
 }
