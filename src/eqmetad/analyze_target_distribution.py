@@ -56,8 +56,15 @@ def main() -> None:
         md_time = np.append(md_time, cfg.total_steps)
     md_time =md_time.reshape(-1, 1)
     
-    plt_stride = max(1, round(cfg.plot_stride / cfg.stride)) if cfg.plot_stride>=cfg.stride else cfg.plot_stride
-    print(f"Plotting every {plt_stride } saved frames.")
+    if cfg.plot_stride <= 0:
+        plt_stride = 0
+        print(f"Plotting $p_w$ is disabled.")
+    elif cfg.plot_stride >= cfg.stride:
+        plt_stride = max(1, round(cfg.plot_stride / cfg.stride))
+        print(f"Plotting $p_w$ every {plt_stride } saved frames.")
+    else:
+        plt_stride = cfg.plot_stride
+        print(f"Plotting $p_w$ every {plt_stride } saved frames.")
     
     current_dir = Path(os.getcwd())
     full_path = (current_dir / cfg.base_dir / cfg.filename).resolve()
